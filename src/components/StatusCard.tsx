@@ -17,6 +17,7 @@ interface StatusCardProps {
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
 const StatusCard = ({
@@ -29,6 +30,7 @@ const StatusCard = ({
   className,
   children,
   onClick,
+  style,
 }: StatusCardProps) => {
   return (
     <div 
@@ -38,6 +40,7 @@ const StatusCard = ({
         className
       )}
       onClick={onClick}
+      style={style}
     >
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-3">
