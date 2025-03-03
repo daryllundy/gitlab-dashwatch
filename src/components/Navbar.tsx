@@ -1,33 +1,24 @@
 
-import React, { useState } from 'react';
-import { Menu, X, Sun, Moon, GitBranch } from 'lucide-react';
-import { cn } from "@/lib/utils";
-
-interface NavItem {
-  name: string;
-  href: string;
-  icon?: React.ReactNode;
-  current: boolean;
-}
-
-const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/', current: true },
-  { name: 'Projects', href: '/projects', current: false },
-  { name: 'DNS', href: '/dns', current: false },
-  { name: 'Uptime', href: '/uptime', current: false },
-  { name: 'Servers', href: '/servers', current: false },
-  { name: 'Settings', href: '/settings', current: false },
-];
+import React from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Moon, Sun, Settings } from 'lucide-react';
 
 const Navbar = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = React.useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // Check if dark mode is already set
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    setDarkMode(isDarkMode);
+  }, []);
 
   const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
     
-    if (newMode) {
+    if (newDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
@@ -35,83 +26,58 @@ const Navbar = () => {
   };
 
   return (
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
-        <div className="w-full py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <a href="/" className="flex items-center gap-2">
-              <div className="bg-primary text-primary-foreground p-1.5 rounded-md">
-                <GitBranch className="h-5 w-5" />
-              </div>
-              <span className="text-xl font-semibold tracking-tight">DashWatch</span>
-            </a>
-            <div className="hidden ml-10 space-x-8 lg:flex">
-              {navigation.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors", 
-                    item.current 
-                      ? "text-primary" 
-                      : "text-muted-foreground hover:text-primary"
-                  )}
-                  aria-current={item.current ? 'page' : undefined}
-                >
-                  {item.name}
-                </a>
-              ))}
+    <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="size-8 rounded-md bg-primary flex items-center justify-center">
+              <span className="text-xl font-semibold text-primary-foreground">D</span>
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              className="p-2 rounded-full text-muted-foreground hover:text-primary"
-              onClick={toggleDarkMode}
+            <span className="text-lg font-semibold">DashWatch</span>
+          </Link>
+          
+          <nav className="ml-10 hidden sm:flex space-x-4">
+            <Link 
+              to="/" 
+              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                location.pathname === '/' 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
             >
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-            
-            <button
-              type="button"
-              className="lg:hidden p-2 rounded-md text-muted-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              Dashboard
+            </Link>
+            <Link 
+              to="/settings" 
+              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                location.pathname === '/settings' 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-muted-foreground hover:bg-muted'
+              }`}
             >
-              <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
-          </div>
+              Settings
+            </Link>
+          </nav>
         </div>
         
-        {/* Mobile menu */}
-        <div
-          className={`lg:hidden ${
-            mobileMenuOpen ? 'block animate-fade-in' : 'hidden animate-fade-out'
-          }`}
-        >
-          <div className="pt-2 pb-3 space-y-1">
-            {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "block px-3 py-2 rounded-md text-base font-medium",
-                  item.current 
-                    ? "bg-primary/5 text-primary" 
-                    : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
-                )}
-                aria-current={item.current ? 'page' : undefined}
-              >
-                {item.name}
-              </a>
-            ))}
-          </div>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-md text-muted-foreground hover:bg-muted"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+          
+          <button
+            onClick={() => navigate('/settings')}
+            className="p-2 rounded-md text-muted-foreground hover:bg-muted sm:hidden"
+            aria-label="Settings"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
         </div>
-      </nav>
+      </div>
     </header>
   );
 };
