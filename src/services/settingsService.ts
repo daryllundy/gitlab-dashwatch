@@ -218,8 +218,7 @@ export const saveSettings = async (settings: Settings): Promise<boolean> => {
   } catch (error) {
     console.error('Error saving settings to Supabase:', error);
     toast("Failed to save settings", {
-      description: "Please try again later",
-      variant: "destructive"
+      description: "Please try again later"
     });
     return false;
   }
