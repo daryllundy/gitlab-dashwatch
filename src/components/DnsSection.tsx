@@ -1,32 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
 import { Globe, Settings } from 'lucide-react';
 import StatusCard from './StatusCard';
 import { useNavigate } from 'react-router-dom';
+import { useSettings } from '@/contexts/SettingsContext';
+import { Button } from './ui/button';
 
 const DnsSection = () => {
   const [dnsRecords, setDnsRecords] = useState([]);
-  const [domains, setDomains] = useState([]);
   const navigate = useNavigate();
-
-  // Load settings from localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        const settings = JSON.parse(savedSettings);
-        if (settings.dns && settings.dns.domains) {
-          setDomains(settings.dns.domains);
-        }
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
-  }, []);
+  const { settings } = useSettings();
 
   // Generate mock DNS records based on configured domains
   useEffect(() => {
-    if (domains.length === 0) {
+    if (settings.dns.domains.length === 0) {
       // Default mock data if no real data is available
       setDnsRecords([
         {
@@ -71,7 +57,7 @@ const DnsSection = () => {
       const newRecords = [];
       let id = 1;
       
-      domains.forEach(domain => {
+      settings.dns.domains.forEach(domain => {
         domain.recordTypes.forEach(type => {
           newRecords.push({
             id: id++,
@@ -87,7 +73,7 @@ const DnsSection = () => {
       
       setDnsRecords(newRecords);
     }
-  }, [domains]);
+  }, [settings.dns.domains]);
 
   const getMockValueForRecordType = (type, domain) => {
     switch (type) {
@@ -111,17 +97,25 @@ const DnsSection = () => {
 
   const refreshRecords = () => {
     // This would be an API call in a real application
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        const settings = JSON.parse(savedSettings);
-        if (settings.dns && settings.dns.domains) {
-          setDomains(settings.dns.domains);
-        }
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
+    // Just re-run the effect to generate new mock data
+    const newRecords = [];
+    let id = 1;
+    
+    settings.dns.domains.forEach(domain => {
+      domain.recordTypes.forEach(type => {
+        newRecords.push({
+          id: id++,
+          domain: domain.domain,
+          type,
+          value: getMockValueForRecordType(type, domain.domain),
+          ttl: 3600,
+          status: getRandomStatus(),
+          lastCheck: `${Math.floor(Math.random() * 30) + 1}m ago`,
+        });
+      });
+    });
+    
+    setDnsRecords(newRecords);
   };
 
   const navigateToSettings = () => {
@@ -136,19 +130,23 @@ const DnsSection = () => {
           <p className="text-sm text-muted-foreground mt-1">Status of your domain records</p>
         </div>
         <div className="flex items-center gap-2">
-          <button 
-            className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+          <Button 
+            variant="ghost"
+            size="sm"
+            className="text-sm font-medium text-primary flex items-center gap-1"
             onClick={navigateToSettings}
           >
             <Settings className="h-4 w-4" />
             Configure
-          </button>
-          <button 
-            className="text-sm font-medium text-primary hover:underline"
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="text-sm font-medium text-primary"
             onClick={refreshRecords}
           >
             Refresh Records
-          </button>
+          </Button>
         </div>
       </div>
       

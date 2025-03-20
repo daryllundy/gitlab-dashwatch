@@ -1,69 +1,23 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Save, Globe, Server, Gitlab, Database } from 'lucide-react';
-
-// Default settings loaded from localStorage or initial values
-const defaultSettings = {
-  gitlab: {
-    instances: [{ url: 'https://gitlab.example.com', name: 'Main GitLab', token: '' }]
-  },
-  uptime: {
-    websites: [
-      { url: 'https://example.com', name: 'Main Website' },
-      { url: 'https://api.example.com', name: 'API Service' },
-      { url: 'https://customers.example.com', name: 'Customer Portal' },
-      { url: 'https://docs.example.com', name: 'Document Service' }
-    ]
-  },
-  dns: {
-    domains: [
-      { domain: 'example.com', recordTypes: ['A', 'MX', 'TXT'] },
-      { domain: 'api.example.com', recordTypes: ['CNAME'] }
-    ]
-  },
-  servers: {
-    instances: [
-      { name: 'Web Server', ip: '192.168.1.101', netdataUrl: 'http://192.168.1.101:19999' },
-      { name: 'Database Server', ip: '192.168.1.102', netdataUrl: 'http://192.168.1.102:19999' },
-      { name: 'Application Server', ip: '192.168.1.103', netdataUrl: 'http://192.168.1.103:19999' },
-      { name: 'Cache Server', ip: '192.168.1.104', netdataUrl: 'http://192.168.1.104:19999' }
-    ]
-  }
-};
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Settings = () => {
-  const [settings, setSettings] = useState(defaultSettings);
+  const { settings: savedSettings, saveSettings, isLoading } = useSettings();
+  const [settings, setSettings] = useState(savedSettings);
   const [activeTab, setActiveTab] = useState("gitlab");
-  const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Load settings from localStorage on component mount
+  // Update local settings when savedSettings changes
   useEffect(() => {
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        setSettings(JSON.parse(savedSettings));
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
-  }, []);
-
-  // Save settings to localStorage
-  const saveSettings = () => {
-    localStorage.setItem('dashboardSettings', JSON.stringify(settings));
-    toast({
-      title: "Settings saved",
-      description: "Your monitoring configuration has been updated.",
-    });
-  };
+    setSettings(savedSettings);
+  }, [savedSettings]);
 
   // Generic function to add an item to any settings category
   const addItem = (category, itemTemplate) => {
@@ -109,6 +63,10 @@ const Settings = () => {
     });
   };
 
+  const handleSaveSettings = async () => {
+    await saveSettings(settings);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -139,7 +97,6 @@ const Settings = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* GitLab Settings */}
           <TabsContent value="gitlab" className="space-y-4">
             <Card>
               <CardHeader>
@@ -200,7 +157,6 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          {/* Website Uptime Settings */}
           <TabsContent value="uptime" className="space-y-4">
             <Card>
               <CardHeader>
@@ -251,7 +207,6 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          {/* DNS Records Settings */}
           <TabsContent value="dns" className="space-y-4">
             <Card>
               <CardHeader>
@@ -306,7 +261,6 @@ const Settings = () => {
             </Card>
           </TabsContent>
 
-          {/* Server Monitoring Settings */}
           <TabsContent value="servers" className="space-y-4">
             <Card>
               <CardHeader>
@@ -374,9 +328,13 @@ const Settings = () => {
           <Button variant="outline" onClick={() => navigate('/')}>
             Cancel
           </Button>
-          <Button onClick={saveSettings} className="flex items-center gap-2">
+          <Button 
+            onClick={handleSaveSettings} 
+            className="flex items-center gap-2"
+            disabled={isLoading}
+          >
             <Save className="h-4 w-4" />
-            Save Settings
+            {isLoading ? 'Saving...' : 'Save Settings'}
           </Button>
         </div>
       </main>

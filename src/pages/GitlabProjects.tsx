@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
+import { useSettings } from '@/contexts/SettingsContext';
 import { 
   Gitlab, ArrowLeft, GitBranch, GitPullRequest, 
   AlertCircle, ExternalLink, RefreshCw, Settings
@@ -13,30 +14,11 @@ import { useToast } from '@/components/ui/use-toast';
 
 const GitlabProjects = () => {
   const [gitlabProjects, setGitlabProjects] = useState([]);
-  const [gitlabInstances, setGitlabInstances] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeInstance, setActiveInstance] = useState('all');
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Load settings from localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        const settings = JSON.parse(savedSettings);
-        if (settings.gitlab && settings.gitlab.instances) {
-          setGitlabInstances(settings.gitlab.instances);
-          if (settings.gitlab.instances.length > 0) {
-            setActiveInstance(settings.gitlab.instances[0].url);
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
-    setIsLoading(false);
-  }, []);
+  const { settings, refreshSettings } = useSettings();
 
   // Mock API call to fetch projects
   useEffect(() => {
@@ -47,7 +29,7 @@ const GitlabProjects = () => {
         console.log('Fetching GitLab projects...');
         
         // Log what would happen in a real implementation
-        gitlabInstances.forEach(instance => {
+        settings.gitlab.instances.forEach(instance => {
           if (instance.token) {
             console.log(`Would fetch projects from ${instance.url} using token: ${instance.token.substring(0, 4)}...`);
           } else {
@@ -69,8 +51,8 @@ const GitlabProjects = () => {
               lastCommit: '2h ago',
               lastCommitter: 'John Doe',
               commitMsg: 'Fix authentication middleware',
-              instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
-              instanceName: gitlabInstances.length > 0 ? gitlabInstances[0].name : 'Main GitLab',
+              instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
+              instanceName: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].name : 'Main GitLab',
             },
             {
               id: 2,
@@ -83,11 +65,9 @@ const GitlabProjects = () => {
               lastCommit: '4h ago',
               lastCommitter: 'Jane Smith',
               commitMsg: 'Update dashboard UI components',
-              instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
-              instanceName: gitlabInstances.length > 0 ? gitlabInstances[0].name : 'Main GitLab',
+              instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
+              instanceName: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].name : 'Main GitLab',
             },
-            // Add more mock data projects with different instance URLs if you have multiple instances
-            // ... other projects with various instance URLs
           ]);
           setIsLoading(false);
         }, 1000); // Simulate loading delay
@@ -102,12 +82,16 @@ const GitlabProjects = () => {
       }
     };
 
-    if (gitlabInstances.length > 0) {
+    if (settings.gitlab.instances.length > 0) {
       fetchProjects();
+      
+      if (settings.gitlab.instances.length > 0) {
+        setActiveInstance(settings.gitlab.instances[0].url);
+      }
     } else {
       setIsLoading(false);
     }
-  }, [gitlabInstances, toast]);
+  }, [settings.gitlab.instances, toast]);
 
   const openProjectInGitlab = (project) => {
     const projectName = project.name.toLowerCase().replace(/\s+/g, '-');
@@ -116,7 +100,7 @@ const GitlabProjects = () => {
   };
 
   const refreshProjects = () => {
-    if (gitlabInstances.length > 0) {
+    if (settings.gitlab.instances.length > 0) {
       setIsLoading(true);
       // This would trigger a real API call in a real application
       setTimeout(() => {
@@ -186,7 +170,7 @@ const GitlabProjects = () => {
           </div>
         </div>
         
-        {gitlabInstances.length === 0 ? (
+        {settings.gitlab.instances.length === 0 ? (
           <Card className="my-8">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Gitlab className="h-16 w-16 text-muted-foreground mb-4" />
@@ -211,7 +195,7 @@ const GitlabProjects = () => {
                 <TabsTrigger value="all">
                   All Instances
                 </TabsTrigger>
-                {gitlabInstances.map((instance) => (
+                {settings.gitlab.instances.map((instance) => (
                   <TabsTrigger key={instance.url} value={instance.url}>
                     {instance.name}
                   </TabsTrigger>

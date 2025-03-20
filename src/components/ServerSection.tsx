@@ -1,10 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Server, Database, HardDrive, Activity, Settings } from 'lucide-react';
 import StatusCard from './StatusCard';
 import AnimatedNumber from './AnimatedNumber';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { useSettings } from '@/contexts/SettingsContext';
+import { Button } from './ui/button';
 
 // Function to fetch server metrics from Netdata
 const fetchNetdataMetrics = async (url) => {
@@ -31,33 +32,15 @@ const fetchNetdataMetrics = async (url) => {
 
 const ServerSection = () => {
   const [servers, setServers] = useState([]);
-  const [serverInstances, setServerInstances] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Load settings from localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        const settings = JSON.parse(savedSettings);
-        if (settings.servers && settings.servers.instances) {
-          setServerInstances(settings.servers.instances);
-        }
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
-    setLoading(false);
-  }, []);
+  const { settings } = useSettings();
 
   // Fetch server metrics from Netdata
   useEffect(() => {
-    if (loading) return;
-
     const fetchAllServerMetrics = async () => {
-      if (serverInstances.length === 0) {
+      if (settings.servers.instances.length === 0) {
         // Use default mock data if no servers are configured
         setServers([
           {
@@ -101,12 +84,13 @@ const ServerSection = () => {
             uptime: '32d 18h',
           },
         ]);
+        setLoading(false);
         return;
       }
 
       try {
         const serverData = await Promise.all(
-          serverInstances.map(async (server, index) => {
+          settings.servers.instances.map(async (server, index) => {
             try {
               if (!server.netdataUrl) {
                 // Generate mock data if no Netdata URL is provided
@@ -162,6 +146,7 @@ const ServerSection = () => {
         );
         
         setServers(serverData);
+        setLoading(false);
       } catch (error) {
         console.error('Failed to fetch server metrics:', error);
         toast({
@@ -169,6 +154,7 @@ const ServerSection = () => {
           description: "Check your Netdata configuration in settings.",
           variant: "destructive",
         });
+        setLoading(false);
       }
     };
 
@@ -178,7 +164,7 @@ const ServerSection = () => {
     const interval = setInterval(fetchAllServerMetrics, 30000);
     
     return () => clearInterval(interval);
-  }, [serverInstances, loading, toast]);
+  }, [settings.servers.instances, toast]);
 
   const getRandomStatus = () => {
     const statuses = ['healthy', 'healthy', 'healthy', 'warning', 'error'];
@@ -208,13 +194,15 @@ const ServerSection = () => {
           <h2 className="text-xl font-semibold tracking-tight">Server Monitoring</h2>
           <p className="text-sm text-muted-foreground mt-1">Hardware and system performance</p>
         </div>
-        <button 
-          className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+        <Button 
+          variant="ghost"
+          size="sm"
+          className="text-sm font-medium text-primary flex items-center gap-1"
           onClick={navigateToSettings}
         >
           <Settings className="h-4 w-4" />
           Configure
-        </button>
+        </Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

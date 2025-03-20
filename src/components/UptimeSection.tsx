@@ -1,33 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
 import { Monitor, Check, X, Settings } from 'lucide-react';
 import StatusCard from './StatusCard';
 import AnimatedNumber from './AnimatedNumber';
 import { useNavigate } from 'react-router-dom';
+import { useSettings } from '@/contexts/SettingsContext';
+import { Button } from './ui/button';
 
 const UptimeSection = () => {
   const [websites, setWebsites] = useState([]);
-  const [configuredWebsites, setConfiguredWebsites] = useState([]);
   const navigate = useNavigate();
-
-  // Load settings from localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        const settings = JSON.parse(savedSettings);
-        if (settings.uptime && settings.uptime.websites) {
-          setConfiguredWebsites(settings.uptime.websites);
-        }
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
-  }, []);
+  const { settings } = useSettings();
 
   // Generate mock website data based on configured websites
   useEffect(() => {
-    if (configuredWebsites.length === 0) {
+    if (settings.uptime.websites.length === 0) {
       // Default mock data if no real data is available
       setWebsites([
         {
@@ -73,7 +59,7 @@ const UptimeSection = () => {
       ]);
     } else {
       // Generate mock data based on configured websites
-      const mockWebsites = configuredWebsites.map((site, index) => {
+      const mockWebsites = settings.uptime.websites.map((site, index) => {
         const statuses = ['healthy', 'healthy', 'healthy', 'warning', 'error'];
         const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
         const uptime = randomStatus === 'healthy' ? 99 + Math.random() : 
@@ -96,7 +82,7 @@ const UptimeSection = () => {
       
       setWebsites(mockWebsites);
     }
-  }, [configuredWebsites]);
+  }, [settings.uptime.websites]);
 
   const navigateToSettings = () => {
     navigate('/settings');
@@ -114,13 +100,15 @@ const UptimeSection = () => {
           <p className="text-sm text-muted-foreground mt-1">Monitoring your web services</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
-            className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+          <Button 
+            variant="ghost"
+            size="sm"
+            className="text-sm font-medium text-primary flex items-center gap-1"
             onClick={navigateToSettings}
           >
             <Settings className="h-4 w-4" />
             Configure
-          </button>
+          </Button>
           <div className="text-sm flex items-center gap-1.5">
             <Check className="h-4 w-4 text-success" />
             <span className="font-medium">{onlineCount} Online</span>

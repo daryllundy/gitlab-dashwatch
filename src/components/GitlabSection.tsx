@@ -1,32 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { GitBranch, Gitlab, GitPullRequest, Settings, ExternalLink } from 'lucide-react';
 import StatusCard from './StatusCard';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const GitlabSection = () => {
   const [gitlabProjects, setGitlabProjects] = useState([]);
-  const [gitlabInstances, setGitlabInstances] = useState([]);
   const [showAllProjects, setShowAllProjects] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Load settings from localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('dashboardSettings');
-    if (savedSettings) {
-      try {
-        const settings = JSON.parse(savedSettings);
-        if (settings.gitlab && settings.gitlab.instances) {
-          setGitlabInstances(settings.gitlab.instances);
-        }
-      } catch (e) {
-        console.error('Failed to parse settings from localStorage:', e);
-      }
-    }
-  }, []);
+  const { settings, isLoading } = useSettings();
 
   // Mock API call to fetch projects
   useEffect(() => {
@@ -34,10 +19,10 @@ const GitlabSection = () => {
     const fetchProjects = async () => {
       try {
         // In a real implementation, we would use the tokens for authentication
-        // const instancesWithTokens = gitlabInstances.filter(instance => instance.token);
+        // const instancesWithTokens = settings.gitlab.instances.filter(instance => instance.token);
         
         // For demo purposes, we'll use mock data but log attempted API calls
-        gitlabInstances.forEach(instance => {
+        settings.gitlab.instances.forEach(instance => {
           if (instance.token) {
             console.log(`Would fetch projects from ${instance.url} using token: ${instance.token.substring(0, 4)}...`);
           } else {
@@ -56,7 +41,7 @@ const GitlabSection = () => {
             branches: 3,
             pullRequests: 2,
             lastCommit: '2h ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 2,
@@ -67,7 +52,7 @@ const GitlabSection = () => {
             branches: 5,
             pullRequests: 3,
             lastCommit: '4h ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 3,
@@ -78,7 +63,7 @@ const GitlabSection = () => {
             branches: 2,
             pullRequests: 0,
             lastCommit: '1d ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 4,
@@ -89,7 +74,7 @@ const GitlabSection = () => {
             branches: 1,
             pullRequests: 0,
             lastCommit: '30d ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 5,
@@ -100,7 +85,7 @@ const GitlabSection = () => {
             branches: 1,
             pullRequests: 1,
             lastCommit: '5h ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 6,
@@ -111,7 +96,7 @@ const GitlabSection = () => {
             branches: 2,
             pullRequests: 2,
             lastCommit: '1d ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 7,
@@ -122,7 +107,7 @@ const GitlabSection = () => {
             branches: 3,
             pullRequests: 1,
             lastCommit: '3d ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
           {
             id: 8,
@@ -133,7 +118,7 @@ const GitlabSection = () => {
             branches: 1,
             pullRequests: 0,
             lastCommit: '2d ago',
-            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+            instanceUrl: settings.gitlab.instances.length > 0 ? settings.gitlab.instances[0].url : 'https://gitlab.example.com',
           },
         ]);
       } catch (error) {
@@ -146,10 +131,10 @@ const GitlabSection = () => {
       }
     };
 
-    if (gitlabInstances.length > 0) {
+    if (settings.gitlab.instances.length > 0 && !isLoading) {
       fetchProjects();
     }
-  }, [gitlabInstances, toast]);
+  }, [settings.gitlab.instances, isLoading, toast]);
 
   const openProjectInGitlab = (project) => {
     // Format: https://gitlab.example.com/project-name
@@ -175,7 +160,7 @@ const GitlabSection = () => {
         <div>
           <h2 className="text-xl font-semibold tracking-tight">GitLab Projects</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Status of your self-hosted projects ({gitlabInstances.length} instances configured)
+            Status of your self-hosted projects ({settings.gitlab.instances.length} instances configured)
           </p>
         </div>
         <div className="flex items-center gap-2">
