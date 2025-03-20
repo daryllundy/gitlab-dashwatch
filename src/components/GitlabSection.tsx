@@ -1,13 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { GitBranch, Gitlab, GitPullRequest, Settings } from 'lucide-react';
+import { GitBranch, Gitlab, GitPullRequest, Settings, ExternalLink } from 'lucide-react';
 import StatusCard from './StatusCard';
 import { useNavigate } from 'react-router-dom';
+import { Button } from './ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 const GitlabSection = () => {
   const [gitlabProjects, setGitlabProjects] = useState([]);
   const [gitlabInstances, setGitlabInstances] = useState([]);
+  const [showAllProjects, setShowAllProjects] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Load settings from localStorage
   useEffect(() => {
@@ -24,56 +28,128 @@ const GitlabSection = () => {
     }
   }, []);
 
-  // Default mock data if no real data is available
+  // Mock API call to fetch projects
   useEffect(() => {
-    // This would be replaced with real API calls to GitLab instances
-    setGitlabProjects([
-      {
-        id: 1,
-        name: 'Backend API',
-        description: 'Main backend service',
-        status: 'healthy',
-        openIssues: 5,
-        branches: 3,
-        pullRequests: 2,
-        lastCommit: '2h ago',
-        instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
-      },
-      {
-        id: 2,
-        name: 'Frontend App',
-        description: 'User interface',
-        status: 'warning',
-        openIssues: 12,
-        branches: 5,
-        pullRequests: 3,
-        lastCommit: '4h ago',
-        instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
-      },
-      {
-        id: 3,
-        name: 'Infrastructure',
-        description: 'Terraform scripts',
-        status: 'healthy',
-        openIssues: 2,
-        branches: 2,
-        pullRequests: 0,
-        lastCommit: '1d ago',
-        instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
-      },
-      {
-        id: 4,
-        name: 'Mobile App',
-        description: 'iOS & Android',
-        status: 'inactive',
-        openIssues: 0,
-        branches: 1,
-        pullRequests: 0,
-        lastCommit: '30d ago',
-        instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
-      },
-    ]);
-  }, [gitlabInstances]);
+    // This would be replaced with real API calls to GitLab instances using the tokens
+    const fetchProjects = async () => {
+      try {
+        // In a real implementation, we would use the tokens for authentication
+        // const instancesWithTokens = gitlabInstances.filter(instance => instance.token);
+        
+        // For demo purposes, we'll use mock data but log attempted API calls
+        gitlabInstances.forEach(instance => {
+          if (instance.token) {
+            console.log(`Would fetch projects from ${instance.url} using token: ${instance.token.substring(0, 4)}...`);
+          } else {
+            console.log(`Would fetch public projects from ${instance.url} (no token provided)`);
+          }
+        });
+        
+        // Mock data
+        setGitlabProjects([
+          {
+            id: 1,
+            name: 'Backend API',
+            description: 'Main backend service',
+            status: 'healthy',
+            openIssues: 5,
+            branches: 3,
+            pullRequests: 2,
+            lastCommit: '2h ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 2,
+            name: 'Frontend App',
+            description: 'User interface',
+            status: 'warning',
+            openIssues: 12,
+            branches: 5,
+            pullRequests: 3,
+            lastCommit: '4h ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 3,
+            name: 'Infrastructure',
+            description: 'Terraform scripts',
+            status: 'healthy',
+            openIssues: 2,
+            branches: 2,
+            pullRequests: 0,
+            lastCommit: '1d ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 4,
+            name: 'Mobile App',
+            description: 'iOS & Android',
+            status: 'inactive',
+            openIssues: 0,
+            branches: 1,
+            pullRequests: 0,
+            lastCommit: '30d ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 5,
+            name: 'Documentation',
+            description: 'Project docs',
+            status: 'healthy',
+            openIssues: 3,
+            branches: 1,
+            pullRequests: 1,
+            lastCommit: '5h ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 6,
+            name: 'Database Migrations',
+            description: 'SQL migrations',
+            status: 'warning',
+            openIssues: 7,
+            branches: 2,
+            pullRequests: 2,
+            lastCommit: '1d ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 7,
+            name: 'Design System',
+            description: 'UI component library',
+            status: 'healthy',
+            openIssues: 4,
+            branches: 3,
+            pullRequests: 1,
+            lastCommit: '3d ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+          {
+            id: 8,
+            name: 'Testing Framework',
+            description: 'E2E and unit tests',
+            status: 'healthy',
+            openIssues: 2,
+            branches: 1,
+            pullRequests: 0,
+            lastCommit: '2d ago',
+            instanceUrl: gitlabInstances.length > 0 ? gitlabInstances[0].url : 'https://gitlab.example.com',
+          },
+        ]);
+      } catch (error) {
+        console.error('Failed to fetch GitLab projects:', error);
+        toast({
+          title: "Error fetching projects",
+          description: "Failed to connect to GitLab instances. Check your settings and connectivity.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (gitlabInstances.length > 0) {
+      fetchProjects();
+    }
+  }, [gitlabInstances, toast]);
 
   const openProjectInGitlab = (project) => {
     // Format: https://gitlab.example.com/project-name
@@ -86,6 +162,13 @@ const GitlabSection = () => {
     navigate('/settings');
   };
 
+  const toggleViewAll = () => {
+    setShowAllProjects(!showAllProjects);
+  };
+
+  // Display all projects or just the first 4
+  const displayProjects = showAllProjects ? gitlabProjects : gitlabProjects.slice(0, 4);
+
   return (
     <div className="section-appear" style={{ '--delay': 1 } as React.CSSProperties}>
       <div className="flex items-center justify-between mb-4">
@@ -96,22 +179,29 @@ const GitlabSection = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button 
-            className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+          <Button 
+            variant="ghost"
+            size="sm"
+            className="text-sm font-medium text-primary flex items-center gap-1"
             onClick={navigateToSettings}
           >
             <Settings className="h-4 w-4" />
             Configure
-          </button>
-          <button className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-            <Gitlab className="h-4 w-4" />
-            View All
-          </button>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="text-sm font-medium text-primary flex items-center gap-1"
+            onClick={toggleViewAll}
+          >
+            <ExternalLink className="h-4 w-4" />
+            {showAllProjects ? "Show Less" : "View All"}
+          </Button>
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {gitlabProjects.map((project, index) => (
+        {displayProjects.map((project, index) => (
           <StatusCard
             key={project.id}
             title={project.name}
@@ -144,6 +234,18 @@ const GitlabSection = () => {
           </StatusCard>
         ))}
       </div>
+      
+      {gitlabProjects.length > 4 && (
+        <div className="flex justify-center mt-4">
+          <Button 
+            variant="outline" 
+            onClick={toggleViewAll}
+            className="w-full max-w-xs"
+          >
+            {showAllProjects ? "Show Less" : `View ${gitlabProjects.length - 4} More Projects`}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
