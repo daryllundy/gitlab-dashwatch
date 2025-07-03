@@ -1,5 +1,8 @@
 # Welcome to your Lovable project
 
+[![GitHub](https://img.shields.io/badge/GitHub-Primary-181717?logo=github)](https://github.com/daryllundy/gitlab-dashwatch) [![GitLab](https://img.shields.io/badge/GitLab-Mirror-FCA121?logo=gitlab)](https://gitlab.com/daryllundy/gitlab-dashwatch)
+
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/a83bb88d-7f1f-480e-889f-6c7f3a516f8d
