@@ -48,14 +48,14 @@ README.md
 CLAUDE.md
 *.md
 
-# Development files
+# Development files (keep build-required configs)
 .eslintrc*
 .prettierrc*
-tsconfig*.json
-vite.config.ts
-tailwind.config.ts
-postcss.config.js
-components.json
+# tsconfig*.json - needed for build
+# vite.config.ts - needed for build  
+# tailwind.config.ts - needed for build
+# postcss.config.js - needed for build
+# components.json - needed for build
 
 # Coverage
 coverage
