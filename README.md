@@ -1,72 +1,122 @@
-# Welcome to your Lovable project
+# GitLab DashWatch
 
 [![GitHub](https://img.shields.io/badge/GitHub-Primary-181717?logo=github)](https://github.com/daryllundy/gitlab-dashwatch) [![GitLab](https://img.shields.io/badge/GitLab-Mirror-FCA121?logo=gitlab)](https://gitlab.com/daryllundy/gitlab-dashwatch)
 
+A self-hosted monitoring dashboard for GitLab instances, servers, DNS domains, and website uptime. Built with React, TypeScript, and Tailwind CSS.
 
-## Project info
+## Prerequisites
 
-**URL**: https://lovable.dev/projects/a83bb88d-7f1f-480e-889f-6c7f3a516f8d
+- Node.js 18+ and npm (for local development)
+- Docker and Docker Compose (for containerized deployment)
+- Supabase account and project for data persistence
 
-## How can I edit this code?
+## Environment Configuration
 
-There are several ways of editing your application.
+1. Copy the environment template:
+   ```sh
+   cp .env.example .env
+   ```
 
-**Use Lovable**
+2. Edit `.env` with your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a83bb88d-7f1f-480e-889f-6c7f3a516f8d) and start prompting.
+## Local Development
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Option 1: Direct Node.js
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repository
+git clone https://github.com/daryllundy/gitlab-dashwatch.git
+cd gitlab-dashwatch
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Option 2: Docker Development Environment
 
-**Use GitHub Codespaces**
+```sh
+# Run development environment with hot reload
+npm run docker:dev
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Or using docker-compose directly
+docker-compose --profile dev up
+```
 
-## What technologies are used for this project?
+The application will be available at `http://localhost:8080`
 
-This project is built with .
+## Production Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Option 1: Docker Container
 
-## How can I deploy this project?
+```sh
+# Build and run production container
+npm run docker:build
+npm run docker:run
 
-Simply open [Lovable](https://lovable.dev/projects/a83bb88d-7f1f-480e-889f-6c7f3a516f8d) and click on Share -> Publish.
+# Or using docker-compose
+npm run docker:prod
+```
 
-## I want to use a custom domain - is that possible?
+The application will be available at `http://localhost:3000`
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+### Option 2: Manual Docker Commands
+
+```sh
+# Build the image
+docker build -t gitlab-dashwatch .
+
+# Run the container
+docker run -p 3000:80 --env-file .env gitlab-dashwatch
+```
+
+### Option 3: Deploy to Hosting Provider
+
+The Docker container can be deployed to any hosting provider that supports Docker:
+
+- **DigitalOcean App Platform**: Push to GitHub/GitLab and deploy directly
+- **Railway**: Connect repository and deploy with automatic builds
+- **Fly.io**: Use `flyctl` to deploy the Docker container
+- **Heroku**: Use Container Registry for Docker deployments
+- **AWS ECS/Fargate**: Deploy using AWS container services
+- **Google Cloud Run**: Deploy serverless containers
+
+## Docker Management Commands
+
+```sh
+# Stop all containers
+npm run docker:stop
+
+# Clean up containers, volumes, and images
+npm run docker:clean
+
+# View logs
+docker-compose logs -f
+```
+
+## Technologies Used
+
+- **Frontend**: React 18, TypeScript, Vite
+- **UI Framework**: shadcn/ui (Radix UI components)
+- **Styling**: Tailwind CSS
+- **State Management**: React Context + TanStack Query
+- **Backend**: Supabase (Database + Authentication)
+- **Routing**: React Router v6
+- **Deployment**: Docker + Nginx
+
+## Features
+
+- Monitor multiple GitLab instances with API integration
+- Track website uptime and response times
+- DNS domain monitoring with record type checking
+- Server monitoring with Netdata integration
+- User authentication and settings persistence
+- Responsive design with dark/light theme support

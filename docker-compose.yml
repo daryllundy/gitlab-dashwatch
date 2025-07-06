@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      # Override these in .env file or environment
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-https://your-project.supabase.co}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-your-anon-key-here}
+    restart: unless-stopped
+    networks:
+      - dashwatch-network
+
+  # Optional: Add a development service that runs with hot reload
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-https://your-project.supabase.co}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-your-anon-key-here}
+    command: npm run dev
+    networks:
+      - dashwatch-network
+    profiles:
+      - dev
+
+networks:
+  dashwatch-network:
+    driver: bridge

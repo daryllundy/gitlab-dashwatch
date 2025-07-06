@@ -8,7 +8,13 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:build": "docker build -t gitlab-dashwatch .",
+    "docker:run": "docker run -p 3000:80 --env-file .env gitlab-dashwatch",
+    "docker:dev": "docker-compose --profile dev up",
+    "docker:prod": "docker-compose up",
+    "docker:stop": "docker-compose down",
+    "docker:clean": "docker-compose down -v --rmi all"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
