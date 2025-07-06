@@ -1,75 +1,27 @@
 
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-
-// Type definitions for our settings
-export interface GitlabInstance {
-  id?: string;
-  url: string;
-  name: string;
-  token?: string;
-}
-
-export interface Website {
-  id?: string;
-  url: string;
-  name: string;
-}
-
-export interface DnsDomain {
-  id?: string;
-  domain: string;
-  recordTypes: string[];
-}
-
-export interface ServerInstance {
-  id?: string;
-  name: string;
-  ip: string;
-  netdataUrl: string;
-}
-
-export interface Settings {
-  gitlab: {
-    instances: GitlabInstance[];
-  };
-  uptime: {
-    websites: Website[];
-  };
-  dns: {
-    domains: DnsDomain[];
-  };
-  servers: {
-    instances: ServerInstance[];
-  };
-}
+import type { Settings } from '@/types';
+import {
+  DEFAULT_GITLAB_INSTANCES,
+  DEFAULT_UPTIME_WEBSITES,
+  DEFAULT_DNS_DOMAINS,
+  DEFAULT_SERVER_INSTANCES,
+} from '@/constants';
 
 // Default settings
 export const defaultSettings: Settings = {
   gitlab: {
-    instances: [{ url: 'https://gitlab.example.com', name: 'Main GitLab', token: '' }]
+    instances: [...DEFAULT_GITLAB_INSTANCES]
   },
   uptime: {
-    websites: [
-      { url: 'https://example.com', name: 'Main Website' },
-      { url: 'https://api.example.com', name: 'API Service' },
-      { url: 'https://customers.example.com', name: 'Customer Portal' },
-      { url: 'https://docs.example.com', name: 'Document Service' }
-    ]
+    websites: [...DEFAULT_UPTIME_WEBSITES]
   },
   dns: {
-    domains: [
-      { domain: 'example.com', recordTypes: ['A', 'MX', 'TXT'] },
-      { domain: 'api.example.com', recordTypes: ['CNAME'] }
-    ]
+    domains: [...DEFAULT_DNS_DOMAINS]
   },
   servers: {
-    instances: [
-      { name: 'Web Server', ip: '192.168.1.101', netdataUrl: 'http://192.168.1.101:19999' },
-      { name: 'Database Server', ip: '192.168.1.102', netdataUrl: 'http://192.168.1.102:19999' },
-      { name: 'Application Server', ip: '192.168.1.103', netdataUrl: 'http://192.168.1.103:19999' },
-      { name: 'Cache Server', ip: '192.168.1.104', netdataUrl: 'http://192.168.1.104:19999' }
-    ]
+    instances: [...DEFAULT_SERVER_INSTANCES]
   }
 };
 

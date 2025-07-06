@@ -19,6 +19,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run docker:stop` - Stop all containers
 - `npm run docker:clean` - Clean up containers, volumes, and images
 
+### Quality Assurance
+- `npm run type-check` - Run TypeScript type checking
+- `npm run lint:fix` - Fix auto-fixable linting issues
+- `npm run check` - Run both type checking and linting
+
 ## Architecture Overview
 
 This is a React dashboard application built with TypeScript and Vite for monitoring self-hosted infrastructure including GitLab instances, servers, DNS domains, and website uptime.
@@ -31,24 +36,31 @@ This is a React dashboard application built with TypeScript and Vite for monitor
 - **Backend**: Supabase for settings persistence and user authentication
 - **Routing**: React Router v6
 
-### Core Architecture
+### Project Organization
 
-The application follows a component-based architecture with these key patterns:
+The codebase follows strict organizational principles:
 
-**Settings Management**: Centralized through `SettingsContext` (src/contexts/SettingsContext.tsx) which handles loading/saving configurations to Supabase. All monitoring targets (GitLab instances, websites, DNS domains, servers) are user-configurable.
+**Type Safety**: 
+- Strict TypeScript configuration with comprehensive type checking
+- Centralized type definitions in `src/types/`
+- Proper prop typing for all components
 
-**Page Structure**: 
-- `src/pages/Index.tsx` - Main dashboard with monitoring sections
-- `src/pages/Settings.tsx` - Configuration interface
-- `src/pages/GitlabProjects.tsx` - Detailed GitLab project view
-- `src/pages/NotFound.tsx` - 404 fallback
+**Error Handling**: 
+- Global error boundary for graceful error handling
+- Component-level error states and loading feedback
+- Environment validation at startup
 
-**Monitoring Sections**: Each section (GitLab, DNS, Uptime, Servers) is a self-contained component in `src/components/` that reads from SettingsContext and displays status cards.
+**Component Architecture**:
+- `src/components/common/` - Reusable components (ErrorBoundary, LoadingSpinner, PageLayout)
+- `src/components/ui/` - shadcn/ui components
+- Feature-specific components organized by domain
 
-**Data Layer**: 
-- `src/services/settingsService.ts` defines the settings schema and Supabase operations
-- `src/lib/supabase.ts` handles Supabase client initialization
-- Settings are stored across multiple Supabase tables (gitlab_instances, uptime_websites, dns_domains, server_instances)
+**Configuration Management**:
+- `src/config/env.ts` - Environment variable validation
+- `src/constants/` - Application constants and defaults
+- `src/services/` - External API integrations
+
+**Settings Management**: Centralized through `SettingsContext` which handles loading/saving configurations to Supabase. All monitoring targets are user-configurable.
 
 ### Component Structure
 

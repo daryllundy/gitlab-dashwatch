@@ -3,14 +3,27 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import StatusIndicator from './StatusIndicator';
 import AnimatedNumber from './AnimatedNumber';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import type { StatusType } from '@/types';
 
-type Status = 'healthy' | 'warning' | 'error' | 'inactive';
-
+/**
+ * StatusCard component - displays monitoring status information in a card format
+ * 
+ * @param title - The main title of the card
+ * @param icon - Optional Lucide icon component to display
+ * @param status - Current status of the monitored item
+ * @param value - Optional numeric value to display
+ * @param unit - Optional unit for the numeric value
+ * @param subtitle - Optional subtitle text
+ * @param className - Additional CSS classes
+ * @param children - Optional child components
+ * @param onClick - Optional click handler
+ * @param style - Optional inline styles
+ */
 interface StatusCardProps {
   title: string;
   icon?: LucideIcon;
-  status: Status;
+  status: StatusType;
   value?: number;
   unit?: string;
   subtitle?: string;

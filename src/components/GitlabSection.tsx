@@ -5,10 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/contexts/SettingsContext';
+import { LoadingSpinner } from './common';
+import type { GitlabProject } from '@/types';
+import { ROUTES, ANIMATION_DELAYS } from '@/constants';
 
 const GitlabSection = () => {
-  const [gitlabProjects, setGitlabProjects] = useState([]);
+  const [gitlabProjects, setGitlabProjects] = useState<GitlabProject[]>([]);
   const [showAllProjects, setShowAllProjects] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { settings, isLoading } = useSettings();
@@ -136,7 +140,7 @@ const GitlabSection = () => {
     }
   }, [settings.gitlab.instances, isLoading, toast]);
 
-  const openProjectInGitlab = (project) => {
+  const openProjectInGitlab = (project: GitlabProject) => {
     // Format: https://gitlab.example.com/project-name
     const projectName = project.name.toLowerCase().replace(/\s+/g, '-');
     const projectUrl = `${project.instanceUrl}/${projectName}`;
@@ -144,7 +148,7 @@ const GitlabSection = () => {
   };
 
   const navigateToSettings = () => {
-    navigate('/settings');
+    navigate(ROUTES.SETTINGS);
   };
 
   const toggleViewAll = () => {
@@ -154,8 +158,16 @@ const GitlabSection = () => {
   // Display all projects or just the first 4
   const displayProjects = showAllProjects ? gitlabProjects : gitlabProjects.slice(0, 4);
 
+  if (isLoading) {
+    return (
+      <div className="section-appear" style={{ '--delay': ANIMATION_DELAYS.SECTION } as React.CSSProperties}>
+        <LoadingSpinner text="Loading GitLab configuration..." />
+      </div>
+    );
+  }
+
   return (
-    <div className="section-appear" style={{ '--delay': 1 } as React.CSSProperties}>
+    <div className="section-appear" style={{ '--delay': ANIMATION_DELAYS.SECTION } as React.CSSProperties}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">GitLab Projects</h2>
