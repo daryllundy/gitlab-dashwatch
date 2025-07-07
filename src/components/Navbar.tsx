@@ -1,12 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Moon, Sun, Settings } from 'lucide-react';
+import { Moon, Sun, Settings, LogIn } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserMenu, AuthDialog } from '@/components/auth';
 
 const Navbar = () => {
   const [darkMode, setDarkMode] = React.useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   React.useEffect(() => {
     // Check if dark mode is already set
@@ -76,7 +81,26 @@ const Navbar = () => {
           >
             <Settings className="h-5 w-5" />
           </button>
+
+          {user ? (
+            <UserMenu />
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAuthDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign In</span>
+            </Button>
+          )}
         </div>
+
+        <AuthDialog 
+          open={showAuthDialog} 
+          onOpenChange={setShowAuthDialog} 
+        />
       </div>
     </header>
   );

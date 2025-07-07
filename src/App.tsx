@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "./contexts/SettingsContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { ErrorBoundary } from "./components/common";
 import { validateEnv } from "./config/env";
 import { ROUTES } from "./constants";
@@ -33,20 +34,22 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <SettingsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path={ROUTES.HOME} element={<Index />} />
-              <Route path={ROUTES.SETTINGS} element={<Settings />} />
-              <Route path={ROUTES.GITLAB_PROJECTS} element={<GitlabProjects />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </SettingsProvider>
+      <AuthProvider>
+        <SettingsProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path={ROUTES.HOME} element={<Index />} />
+                <Route path={ROUTES.SETTINGS} element={<Settings />} />
+                <Route path={ROUTES.GITLAB_PROJECTS} element={<GitlabProjects />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </SettingsProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

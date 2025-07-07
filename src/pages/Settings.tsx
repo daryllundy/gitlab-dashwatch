@@ -5,13 +5,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Save, Globe, Server, Gitlab, Database } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Trash2, Save, Globe, Server, Gitlab, Database, LogIn, AlertCircle, Shield } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { AuthDialog } from '@/components/auth';
+import { PageLayout } from '@/components/common';
 
 const Settings = () => {
   const { settings: savedSettings, saveSettings, isLoading } = useSettings();
+  const { user } = useAuth();
   const [settings, setSettings] = useState(savedSettings);
   const [activeTab, setActiveTab] = useState("gitlab");
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
 
   // Update local settings when savedSettings changes
@@ -64,6 +70,10 @@ const Settings = () => {
   };
 
   const handleSaveSettings = async () => {
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
     await saveSettings(settings);
   };
 
@@ -76,6 +86,23 @@ const Settings = () => {
             Configure your monitoring dashboard
           </p>
         </div>
+
+        {!user && (
+          <Alert className="mb-6">
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Authentication Required:</strong> To save your settings permanently, please{' '}
+              <Button
+                variant="link"
+                className="p-0 h-auto font-semibold"
+                onClick={() => setShowAuthDialog(true)}
+              >
+                sign in
+              </Button>
+              . Settings will be saved locally until you sign in.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
@@ -338,6 +365,11 @@ const Settings = () => {
           </Button>
         </div>
       </main>
+
+      <AuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
+      />
     </div>
   );
 };
