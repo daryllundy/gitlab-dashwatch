@@ -286,66 +286,52 @@ docker-compose up --build
 
 ## Video Demos
 
-Interactive terminal demonstrations are available in the [`docs/demos/`](docs/demos/) directory.
+Interactive terminal demonstrations showing GitLab DashWatch setup and deployment workflows.
 
 ### Quick Start Demo
-**File**: [`docs/demos/quick-start-demo.cast`](docs/demos/quick-start-demo.cast)  
-**Duration**: ~38 seconds  
-*Complete setup from clone to running application with Docker*
-
-```bash
-# Play locally with asciinema
-asciinema play docs/demos/quick-start-demo.cast
-```
+[![asciicast](https://asciinema.org/a/XiEIrtP1XjFUnOD8hiXE21xSN.svg)](https://asciinema.org/a/XiEIrtP1XjFUnOD8hiXE21xSN)
+*Complete setup from clone to running application with Docker (~38 seconds)*
 
 ### Authentication Flow Demo  
-**File**: [`docs/demos/auth-flow-demo.cast`](docs/demos/auth-flow-demo.cast)  
-**Duration**: ~42 seconds  
-*User registration, login, and settings persistence demonstration*
-
-```bash
-# Play locally with asciinema
-asciinema play docs/demos/auth-flow-demo.cast
-```
+[![asciicast](https://asciinema.org/a/U1CUP8TS7PU2olD09LwuHXgrh.svg)](https://asciinema.org/a/U1CUP8TS7PU2olD09LwuHXgrh)
+*User registration, login, and settings persistence demonstration (~42 seconds)*
 
 ### Docker Development Workflow
-**File**: [`docs/demos/docker-dev-workflow.cast`](docs/demos/docker-dev-workflow.cast)  
-**Duration**: ~44 seconds  
-*Development environment setup with hot reload and testing*
-
-```bash
-# Play locally with asciinema
-asciinema play docs/demos/docker-dev-workflow.cast
-```
+[![asciicast](https://asciinema.org/a/gVas8of05Pgi8iM0mGGanLnAE.svg)](https://asciinema.org/a/gVas8of05Pgi8iM0mGGanLnAE)
+*Development environment setup with hot reload and testing (~44 seconds)*
 
 ### Production Deployment Demo
-**File**: [`docs/demos/production-deploy-demo.cast`](docs/demos/production-deploy-demo.cast)  
-**Duration**: ~60 seconds  
-*Building and deploying to production with environment configuration*
-
-```bash
-# Play locally with asciinema
-asciinema play docs/demos/production-deploy-demo.cast
-```
+[![asciicast](https://asciinema.org/a/xK6f3fdaWlaQEdt3HTnKwhmTh.svg)](https://asciinema.org/a/xK6f3fdaWlaQEdt3HTnKwhmTh)
+*Building and deploying to production with environment configuration (~60 seconds)*
 
 ### Viewing Demos
 
-#### Install asciinema player:
-```sh
+#### Option 1: Click the embedded players above
+Each demo includes an interactive asciinema player that you can click to play directly in this README.
+
+#### Option 2: Play locally
+```bash
+# Install asciinema player
 npm install -g asciinema
+
+# List available demos
+npm run demos:play
+
+# Play any demo locally
+asciinema play docs/demos/quick-start-demo.cast
+asciinema play docs/demos/auth-flow-demo.cast
+asciinema play docs/demos/docker-dev-workflow.cast
+asciinema play docs/demos/production-deploy-demo.cast
 ```
 
-#### Play any demo:
-```sh
-asciinema play docs/demos/<demo-name>.cast
-```
+#### Option 3: Open in asciinema.org
+- [Quick Start Demo](https://asciinema.org/a/XiEIrtP1XjFUnOD8hiXE21xSN)
+- [Authentication Flow Demo](https://asciinema.org/a/U1CUP8TS7PU2olD09LwuHXgrh)
+- [Docker Development Workflow](https://asciinema.org/a/gVas8of05Pgi8iM0mGGanLnAE)
+- [Production Deployment Demo](https://asciinema.org/a/xK6f3fdaWlaQEdt3HTnKwhmTh)
 
-#### Upload to asciinema.org (optional):
-```sh
-asciinema upload docs/demos/<demo-name>.cast
-```
-
-See [`docs/demos/README.md`](docs/demos/README.md) for detailed information about the demo recordings.
+📁 **Local Files**: All demo recordings are available in [`docs/demos/`](docs/demos/) directory.  
+📚 **Documentation**: See [`docs/demos/README.md`](docs/demos/README.md) for detailed information.
 
 ## Contributing
 

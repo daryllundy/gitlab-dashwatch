@@ -60,10 +60,11 @@ for demo in "$DEMOS_DIR"/*.cast; do
             
             echo "  ✅ Success: $demo_url"
             
-            # Log the result
+            # Log the result with embedding code
             echo "## $demo_name" >> "$UPLOAD_LOG"
             echo "- File: $filename" >> "$UPLOAD_LOG"
             echo "- URL: $demo_url" >> "$UPLOAD_LOG"
+            echo "- Embedded: \`[![asciicast]($demo_url.svg)]($demo_url)\`" >> "$UPLOAD_LOG"
             echo "- Uploaded: $(date)" >> "$UPLOAD_LOG"
             echo "" >> "$UPLOAD_LOG"
         else
