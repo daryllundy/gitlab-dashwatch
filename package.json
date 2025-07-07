@@ -31,7 +31,9 @@
     "docker:dev": "docker-compose --profile dev up",
     "docker:prod": "docker-compose up",
     "docker:stop": "docker-compose down",
-    "docker:clean": "docker-compose down -v --rmi all"
+    "docker:clean": "docker-compose down -v --rmi all",
+    "demos:upload": "./scripts/upload-demos.sh",
+    "demos:play": "echo 'Available demos:' && ls docs/demos/*.cast && echo 'Play with: asciinema play docs/demos/<demo-name>.cast'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

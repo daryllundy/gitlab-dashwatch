@@ -286,36 +286,66 @@ docker-compose up --build
 
 ## Video Demos
 
+Interactive terminal demonstrations are available in the [`docs/demos/`](docs/demos/) directory.
+
 ### Quick Start Demo
-[![asciicast](https://asciinema.org/a/quick-start-demo.svg)](https://asciinema.org/a/quick-start-demo)
+**File**: [`docs/demos/quick-start-demo.cast`](docs/demos/quick-start-demo.cast)  
+**Duration**: ~38 seconds  
 *Complete setup from clone to running application with Docker*
 
-### Authentication Flow Demo
-[![asciicast](https://asciinema.org/a/auth-flow-demo.svg)](https://asciinema.org/a/auth-flow-demo)
+```bash
+# Play locally with asciinema
+asciinema play docs/demos/quick-start-demo.cast
+```
+
+### Authentication Flow Demo  
+**File**: [`docs/demos/auth-flow-demo.cast`](docs/demos/auth-flow-demo.cast)  
+**Duration**: ~42 seconds  
 *User registration, login, and settings persistence demonstration*
 
+```bash
+# Play locally with asciinema
+asciinema play docs/demos/auth-flow-demo.cast
+```
+
 ### Docker Development Workflow
-[![asciicast](https://asciinema.org/a/docker-dev-workflow.svg)](https://asciinema.org/a/docker-dev-workflow)
+**File**: [`docs/demos/docker-dev-workflow.cast`](docs/demos/docker-dev-workflow.cast)  
+**Duration**: ~44 seconds  
 *Development environment setup with hot reload and testing*
 
+```bash
+# Play locally with asciinema
+asciinema play docs/demos/docker-dev-workflow.cast
+```
+
 ### Production Deployment Demo
-[![asciicast](https://asciinema.org/a/production-deploy-demo.svg)](https://asciinema.org/a/production-deploy-demo)
+**File**: [`docs/demos/production-deploy-demo.cast`](docs/demos/production-deploy-demo.cast)  
+**Duration**: ~60 seconds  
 *Building and deploying to production with environment configuration*
 
-### Recording Your Own Demos
-
-To create your own asciinema recordings:
-
-```sh
-# Install asciinema
-npm install -g asciinema
-
-# Record a session
-asciinema rec
-
-# Upload and get embeddable link
-asciinema upload <recording-file>
+```bash
+# Play locally with asciinema
+asciinema play docs/demos/production-deploy-demo.cast
 ```
+
+### Viewing Demos
+
+#### Install asciinema player:
+```sh
+npm install -g asciinema
+```
+
+#### Play any demo:
+```sh
+asciinema play docs/demos/<demo-name>.cast
+```
+
+#### Upload to asciinema.org (optional):
+```sh
+asciinema upload docs/demos/<demo-name>.cast
+```
+
+See [`docs/demos/README.md`](docs/demos/README.md) for detailed information about the demo recordings.
 
 ## Contributing
 
