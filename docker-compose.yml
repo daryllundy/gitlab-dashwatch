@@ -5,15 +5,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-https://your-project.supabase.co}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-your-anon-key-here}
     ports:
       - "3000:80"
-    environment:
-      # Override these in .env file or environment
-      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-https://your-project.supabase.co}
-      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-your-anon-key-here}
     restart: unless-stopped
     networks:
       - dashwatch-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Optional: Add a development service that runs with hot reload
   dev:
@@ -33,6 +38,13 @@ services:
       - dashwatch-network
     profiles:
       - dev
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: rebuild
+          path: package.json
 
 networks:
   dashwatch-network:

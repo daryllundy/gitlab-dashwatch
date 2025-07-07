@@ -85,11 +85,14 @@ The application will be available at `http://localhost:3000`
 ### Option 2: Manual Docker Commands
 
 ```sh
-# Build the image
-docker build -t gitlab-dashwatch .
+# Build the image with environment variables
+docker build \
+  --build-arg VITE_SUPABASE_URL=$(grep VITE_SUPABASE_URL .env | cut -d '=' -f2) \
+  --build-arg VITE_SUPABASE_ANON_KEY=$(grep VITE_SUPABASE_ANON_KEY .env | cut -d '=' -f2) \
+  -t gitlab-dashwatch .
 
 # Run the container
-docker run -p 3000:80 --env-file .env gitlab-dashwatch
+docker run -p 3000:80 gitlab-dashwatch
 ```
 
 ### Option 3: Use Pre-built Docker Image
@@ -102,10 +105,12 @@ docker pull dbdaryl/gitlab-dashwatch:latest
 
 # Run with environment variables
 docker run -p 3000:80 \
-  -e VITE_SUPABASE_URL=your-supabase-url \
-  -e VITE_SUPABASE_ANON_KEY=your-anon-key \
+  --build-arg VITE_SUPABASE_URL=your-supabase-url \
+  --build-arg VITE_SUPABASE_ANON_KEY=your-anon-key \
   dbdaryl/gitlab-dashwatch:latest
 ```
+
+**Note**: For production deployments, environment variables must be provided at build time since this is a static React application.
 
 ### Option 4: Deploy to Hosting Provider
 
@@ -149,11 +154,12 @@ docker-compose logs -f
 - 📊 Track website uptime and response times
 - 🌐 DNS domain monitoring with record type checking
 - 🖥️ Server monitoring with Netdata integration
-- 🔐 User authentication and settings persistence
+- 🔐 User authentication and settings persistence via Supabase
 - 🎨 Responsive design with dark/light theme support
 - 🐳 Docker containerization for easy deployment
 - ✅ Comprehensive testing suite
 - 📈 Production-ready with error handling and monitoring
+- 🔑 OAuth integration (GitHub) for seamless sign-in
 
 ## Testing
 
@@ -173,15 +179,189 @@ npm run test:coverage
 npm run check
 ```
 
+## Authentication Setup
+
+GitLab DashWatch uses [Supabase](https://supabase.com) for user authentication and settings persistence. To set up authentication:
+
+1. **Create a Supabase Project**:
+   - Go to [supabase.com](https://supabase.com) and create a new project
+   - Note your project URL and anon key from the API settings
+
+2. **Configure Environment Variables**:
+   ```sh
+   # Copy the environment template
+   cp .env.example .env
+   
+   # Edit .env with your Supabase credentials
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
+
+3. **Authentication Features**:
+   - 📧 Email/password authentication
+   - 🔗 GitHub OAuth integration
+   - 💾 Persistent settings storage per user
+   - 🔒 Secure session management
+   - ⚠️ Guest mode with local-only settings
+
+**Important**: Without authentication, settings are stored locally and will be lost when the browser data is cleared.
+
+## Docker Configuration
+
+### Building with Environment Variables
+
+For production deployments, environment variables must be provided at **build time**:
+
+```sh
+# Method 1: Using docker build with args
+docker build \
+  --build-arg VITE_SUPABASE_URL=your-supabase-url \
+  --build-arg VITE_SUPABASE_ANON_KEY=your-anon-key \
+  -t gitlab-dashwatch .
+
+# Method 2: Using docker-compose with .env file
+docker-compose up --build
+```
+
+### Development vs Production
+
+- **Development**: Uses `Dockerfile.dev` with hot reload and volume mounting
+- **Production**: Uses multi-stage build with optimized Nginx serving
+
 ## Quick Start with Docker
 
 The fastest way to get started:
 
 ```sh
-# 1. Pull and run the pre-built image
-docker run -p 3000:80 dbdaryl/gitlab-dashwatch:latest
+# 1. Clone and configure
+git clone https://github.com/daryllundy/gitlab-dashwatch.git
+cd gitlab-dashwatch
+cp .env.example .env
+# Edit .env with your Supabase credentials
 
-# 2. Visit http://localhost:3000
+# 2. Build and run with Docker Compose
+docker-compose up --build
 
-# 3. Configure your Supabase credentials in settings
+# 3. Visit http://localhost:3000
+
+# 4. Sign in to save settings permanently
 ```
+
+## Screenshots
+
+### Dashboard Overview
+![Dashboard Overview](docs/screenshots/dashboard-overview.png)
+*Main dashboard showing monitoring status for GitLab instances, websites, DNS, and servers*
+
+### Authentication
+![Sign In Dialog](docs/screenshots/auth-dialog.png)
+*User authentication with email/password and GitHub OAuth*
+
+![User Menu](docs/screenshots/user-menu.png)
+*Authenticated user menu with settings and logout options*
+
+### Settings Configuration
+![GitLab Settings](docs/screenshots/settings-gitlab.png)
+*Configure multiple GitLab instances with API tokens*
+
+![Website Monitoring](docs/screenshots/settings-uptime.png)
+*Add websites for uptime monitoring*
+
+![DNS Monitoring](docs/screenshots/settings-dns.png)
+*Configure DNS domain monitoring with record types*
+
+![Server Monitoring](docs/screenshots/settings-servers.png)
+*Set up server monitoring with Netdata integration*
+
+### Theme Support
+![Dark Mode](docs/screenshots/dark-mode.png)
+*Dark theme support for better visibility*
+
+![Light Mode](docs/screenshots/light-mode.png)
+*Light theme with clean, professional design*
+
+### Authentication Warning
+![Auth Warning](docs/screenshots/auth-warning.png)
+*Warning banner for unauthenticated users about temporary settings storage*
+
+## Video Demos
+
+### Quick Start Demo
+[![asciicast](https://asciinema.org/a/quick-start-demo.svg)](https://asciinema.org/a/quick-start-demo)
+*Complete setup from clone to running application with Docker*
+
+### Authentication Flow Demo
+[![asciicast](https://asciinema.org/a/auth-flow-demo.svg)](https://asciinema.org/a/auth-flow-demo)
+*User registration, login, and settings persistence demonstration*
+
+### Docker Development Workflow
+[![asciicast](https://asciinema.org/a/docker-dev-workflow.svg)](https://asciinema.org/a/docker-dev-workflow)
+*Development environment setup with hot reload and testing*
+
+### Production Deployment Demo
+[![asciicast](https://asciinema.org/a/production-deploy-demo.svg)](https://asciinema.org/a/production-deploy-demo)
+*Building and deploying to production with environment configuration*
+
+### Recording Your Own Demos
+
+To create your own asciinema recordings:
+
+```sh
+# Install asciinema
+npm install -g asciinema
+
+# Record a session
+asciinema rec
+
+# Upload and get embeddable link
+asciinema upload <recording-file>
+```
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+1. **Fork and clone the repository**
+2. **Install dependencies**: `npm install`
+3. **Set up environment**: `cp .env.example .env` and configure Supabase
+4. **Start development server**: `npm run dev`
+5. **Run tests**: `npm test`
+6. **Submit a pull request**
+
+### Project Structure
+
+```
+src/
+├── components/        # Reusable UI components
+│   ├── auth/         # Authentication components
+│   ├── common/       # Common components (ErrorBoundary, Loading)
+│   └── ui/           # shadcn/ui components
+├── contexts/         # React contexts (Auth, Settings)
+├── hooks/            # Custom React hooks
+├── pages/            # Page components
+├── services/         # API services and utilities
+├── types/            # TypeScript type definitions
+├── config/           # Configuration files
+└── constants/        # Application constants
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 🐛 **Bug Reports**: [Create an issue](https://github.com/daryllundy/gitlab-dashwatch/issues)
+- 💡 **Feature Requests**: [Start a discussion](https://github.com/daryllundy/gitlab-dashwatch/discussions)
+- 📚 **Documentation**: Check the [docs](./docs) directory
+- 💬 **Community**: Join our discussions on GitHub
+
+## Acknowledgments
+
+- Built with [Lovable.dev](https://lovable.dev) for rapid prototyping
+- Powered by [Supabase](https://supabase.com) for authentication and data
+- UI components from [shadcn/ui](https://ui.shadcn.com)
+- Icons by [Lucide](https://lucide.dev)
+- Monitoring inspiration from GitLab's own monitoring tools
