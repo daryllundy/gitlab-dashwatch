@@ -1,0 +1,28 @@
+# This is a reusable workflow for building and testing the Docker image.
+# It can be called by other workflows (e.g., CI and Release).
+# This promotes code reuse and ensures consistency in the build process.
+name: Reusable Docker Build
+
+on:
+  workflow_call:
+
+jobs:
+  # The 'build-and-test-docker' job builds the Docker image and runs a simple test.
+  build-and-test-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t gitlab-dashwatch .
+
+      # This step runs the Docker container in detached mode, waits for 10 seconds,
+      # checks the logs, and then stops the container. This is a simple way to
+      # test that the container starts up correctly.
+      - name: Test Docker container
+        run: |
+          docker run -d --name test-container gitlab-dashwatch
+          sleep 10
+          docker logs test-container
+          docker stop test-container
