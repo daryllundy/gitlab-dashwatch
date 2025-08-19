@@ -6,7 +6,7 @@
 [![Docker Hub](https://img.shields.io/badge/docker-hub-blue.svg)](https://hub.docker.com/r/dbdaryl/gitlab-dashwatch)
 [![GitLab Mirror](https://img.shields.io/badge/gitlab-mirror-orange.svg)](https://gitlab.com/daryllundy/gitlab-dashwatch)
 
-A self-hosted monitoring dashboard for GitLab instances, servers, DNS domains, and website uptime. Built with React, TypeScript, and Tailwind CSS.
+A self-hosted monitoring dashboard for GitLab instances, servers, DNS domains, and website uptime. Built with React, TypeScript, and Tailwind CSS. No authentication required - settings are stored locally in your browser.
 
 ## Project History
 
@@ -26,20 +26,10 @@ While Lovable.dev provided an excellent foundation for rapid prototyping, this v
 
 - Node.js 18+ and npm (for local development)
 - Docker and Docker Compose (for containerized deployment)
-- Supabase account and project for data persistence
 
 ## Environment Configuration
 
-1. Copy the environment template:
-   ```sh
-   cp .env.example .env
-   ```
-
-2. Edit `.env` with your Supabase credentials:
-   ```env
-   VITE_SUPABASE_URL=https://your-project-id.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-anon-key-here
-   ```
+No environment variables are required for basic operation. The application runs without authentication and stores all settings locally in your browser.
 
 ## Local Development
 
@@ -89,11 +79,8 @@ The application will be available at `http://localhost:3000`
 ### Option 2: Manual Docker Commands
 
 ```sh
-# Build the image with environment variables
-docker build \
-  --build-arg VITE_SUPABASE_URL=$(grep VITE_SUPABASE_URL .env | cut -d '=' -f2) \
-  --build-arg VITE_SUPABASE_ANON_KEY=$(grep VITE_SUPABASE_ANON_KEY .env | cut -d '=' -f2) \
-  -t gitlab-dashwatch .
+# Build the image
+docker build -t gitlab-dashwatch .
 
 # Run the container
 docker run -p 3000:80 gitlab-dashwatch
@@ -107,14 +94,9 @@ Pull and run the pre-built image from Docker Hub:
 # Pull the latest image
 docker pull dbdaryl/gitlab-dashwatch:latest
 
-# Run with environment variables
-docker run -p 3000:80 \
-  --build-arg VITE_SUPABASE_URL=your-supabase-url \
-  --build-arg VITE_SUPABASE_ANON_KEY=your-anon-key \
-  dbdaryl/gitlab-dashwatch:latest
+# Run the container
+docker run -p 3000:80 dbdaryl/gitlab-dashwatch:latest
 ```
-
-**Note**: For production deployments, environment variables must be provided at build time since this is a static React application.
 
 ### Option 4: Deploy to Hosting Provider
 
@@ -128,6 +110,8 @@ The Docker container can be deployed to any hosting provider that supports Docke
 - **Google Cloud Run**: Deploy serverless containers
 
 **Docker Hub**: `dbdaryl/gitlab-dashwatch:latest`
+
+**Note**: No environment variables or external dependencies are required for deployment.
 
 ## Docker Management Commands
 
