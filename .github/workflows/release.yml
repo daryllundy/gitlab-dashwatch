@@ -1,0 +1,15 @@
+# This workflow is triggered when a new tag is pushed to the repository.
+# It is responsible for building the Docker image for the new release.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  # This job calls the reusable workflow to build the Docker image.
+  # Using a reusable workflow ensures that the Docker build process is consistent
+  # across different workflows (e.g., CI and Release).
+  build_docker:
+    uses: ./.github/workflows/reusable-docker-build.yml

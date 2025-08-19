@@ -1,11 +1,22 @@
+# This workflow mirrors the repository to GitLab.
+# It is triggered on push, delete, and on a daily schedule.
+# This ensures that the GitLab repository is always up-to-date.
 name: Mirror to GitLab
 
 on:
   push:
     branches: [main, master, develop]
-  workflow_dispatch:
+  delete:
+  schedule:
+    - cron: '0 0 * * *'  # Daily sync as backup
+
+# Concurrency control ensures that only one instance of this workflow runs at a time for the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # The 'gitlab-mirror' job performs the mirroring.
   gitlab-mirror:
     runs-on: ubuntu-latest
     steps:
@@ -14,6 +25,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      # This action handles the mirroring to GitLab using an SSH key.
+      # It is more secure than using a personal access token in the URL.
       - name: Mirror to GitLab
         uses: wearerequired/git-mirror-action@master
         env:
@@ -22,6 +35,7 @@ jobs:
           source-repo: "https://github.com/${{ github.repository }}.git"
           destination-repo: "git@gitlab.com:daryllundy/gitlab-dashwatch.git"
 
+      # This step checks the exit code of the previous step to determine if the mirror was successful.
       - name: GitLab Mirror Status
         if: always()
         run: |
