@@ -181,7 +181,29 @@ npm run test:coverage
 
 # Type checking and linting
 npm run check
+
+# Validate environment configuration
+npm run validate:env
 ```
+
+### Environment Configuration Validation
+
+The project includes automated validation to ensure the `.env.example` file stays in sync with code requirements:
+
+```sh
+# Validate .env.example completeness and documentation
+npm run validate:env
+
+# Run validation as part of the full check suite
+npm run check
+```
+
+The validation checks:
+- ✅ All required environment variables are documented
+- ✅ Account configuration examples are provided
+- ✅ Security best practices are documented
+- ✅ Use case examples are included
+- ✅ Variable naming consistency is maintained
 
 ## Authentication Setup
 
