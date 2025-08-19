@@ -5,21 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Trash2, Save, Globe, Server, Gitlab, Database, LogIn, AlertCircle, Shield } from 'lucide-react';
+import { Plus, Trash2, Save, Globe, Server, Gitlab, Database } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { AuthDialog } from '@/components/auth';
-import { PageLayout } from '@/components/common';
 
 type SettingsCategory = 'gitlab' | 'uptime' | 'dns' | 'servers';
 
 const Settings = () => {
   const { settings: savedSettings, saveSettings, isLoading } = useSettings();
-  const { user, canManageSettings, canViewSettings, userRoleInfo } = useAuth();
   const [settings, setSettings] = useState(savedSettings);
   const [activeTab, setActiveTab] = useState("gitlab");
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,41 +79,10 @@ const Settings = () => {
   };
 
   const handleSaveSettings = async () => {
-    if (!user) {
-      setShowAuthDialog(true);
-      return;
-    }
-    if (!canManageSettings) {
-      return; // Should not happen due to UI restrictions, but safety check
-    }
     await saveSettings(settings);
   };
 
-  // Check if user has permission to view settings
-  if (!canViewSettings) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8 animate-slide-in">
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground mt-2">
-              Configure your monitoring dashboard
-            </p>
-          </div>
-          
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Access Denied:</strong> You don't have permission to view settings. 
-              {userRoleInfo.isEnvironmentAccount && userRoleInfo.accountName && (
-                <span> Your environment account "{userRoleInfo.accountName}" has {userRoleInfo.role} role.</span>
-              )}
-            </AlertDescription>
-          </Alert>
-        </main>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -131,35 +94,7 @@ const Settings = () => {
           </p>
         </div>
 
-        {!user && (
-          <Alert className="mb-6">
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Authentication Required:</strong> To save your settings permanently, please{' '}
-              <Button
-                variant="link"
-                className="p-0 h-auto font-semibold"
-                onClick={() => setShowAuthDialog(true)}
-              >
-                sign in
-              </Button>
-              . Settings will be saved locally until you sign in.
-            </AlertDescription>
-          </Alert>
-        )}
 
-        {user && !canManageSettings && (
-          <Alert className="mb-6">
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Read-Only Mode:</strong> You have view-only access to settings. 
-              {userRoleInfo.isEnvironmentAccount && userRoleInfo.accountName && (
-                <span> Your environment account "{userRoleInfo.accountName}" has {userRoleInfo.role} role.</span>
-              )}
-              {' '}Contact an administrator to modify settings.
-            </AlertDescription>
-          </Alert>
-        )}
 
         <Tabs defaultValue="gitlab" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
@@ -199,7 +134,6 @@ const Settings = () => {
                           id={`gitlab-name-${index}`}
                           value={instance.name}
                           onChange={(e) => updateItemProperty('gitlab', index, 'name', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -208,7 +142,6 @@ const Settings = () => {
                           id={`gitlab-url-${index}`}
                           value={instance.url}
                           onChange={(e) => updateItemProperty('gitlab', index, 'url', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
@@ -220,7 +153,6 @@ const Settings = () => {
                         value={instance.token}
                         onChange={(e) => updateItemProperty('gitlab', index, 'token', e.target.value)}
                         placeholder="Personal access token for private repositories"
-                        disabled={!canManageSettings}
                       />
                     </div>
                     <Button
@@ -228,7 +160,6 @@ const Settings = () => {
                       size="sm"
                       onClick={() => removeItem('gitlab', index)}
                       className="mt-2"
-                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
@@ -238,7 +169,6 @@ const Settings = () => {
                   onClick={() => addItem('gitlab', { url: '', name: 'New GitLab Instance', token: '' })}
                   className="w-full"
                   variant="outline"
-                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add GitLab Instance
                 </Button>
@@ -264,7 +194,6 @@ const Settings = () => {
                           id={`website-name-${index}`}
                           value={website.name}
                           onChange={(e) => updateItemProperty('uptime', index, 'name', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -273,7 +202,6 @@ const Settings = () => {
                           id={`website-url-${index}`}
                           value={website.url}
                           onChange={(e) => updateItemProperty('uptime', index, 'url', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
@@ -282,7 +210,6 @@ const Settings = () => {
                       size="sm"
                       onClick={() => removeItem('uptime', index)}
                       className="mt-2"
-                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
@@ -292,7 +219,6 @@ const Settings = () => {
                   onClick={() => addItem('uptime', { url: '', name: 'New Website' } as any)}
                   className="w-full"
                   variant="outline"
-                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Website
                 </Button>
@@ -318,7 +244,6 @@ const Settings = () => {
                           id={`domain-name-${index}`}
                           value={domain.domain}
                           onChange={(e) => updateItemProperty('dns', index, 'domain', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -331,7 +256,6 @@ const Settings = () => {
                             updateItemProperty('dns', index, 'recordTypes', recordTypes);
                           }}
                           placeholder="A,CNAME,MX,TXT"
-                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
@@ -340,7 +264,6 @@ const Settings = () => {
                       size="sm"
                       onClick={() => removeItem('dns', index)}
                       className="mt-2"
-                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
@@ -350,7 +273,6 @@ const Settings = () => {
                   onClick={() => addItem('dns', { domain: '', recordTypes: ['A'] } as any)}
                   className="w-full"
                   variant="outline"
-                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Domain
                 </Button>
@@ -376,7 +298,6 @@ const Settings = () => {
                           id={`server-name-${index}`}
                           value={server.name}
                           onChange={(e) => updateItemProperty('servers', index, 'name', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -385,7 +306,6 @@ const Settings = () => {
                           id={`server-ip-${index}`}
                           value={server.ip}
                           onChange={(e) => updateItemProperty('servers', index, 'ip', e.target.value)}
-                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
@@ -396,7 +316,6 @@ const Settings = () => {
                         value={server.netdataUrl}
                         onChange={(e) => updateItemProperty('servers', index, 'netdataUrl', e.target.value)}
                         placeholder="http://ip-address:19999"
-                        disabled={!canManageSettings}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         Default Netdata port is 19999. URL should include protocol (http/https).
@@ -407,7 +326,6 @@ const Settings = () => {
                       size="sm"
                       onClick={() => removeItem('servers', index)}
                       className="mt-2"
-                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
@@ -417,7 +335,6 @@ const Settings = () => {
                   onClick={() => addItem('servers', { name: 'New Server', ip: '', netdataUrl: '' })}
                   className="w-full"
                   variant="outline"
-                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Server
                 </Button>
@@ -433,7 +350,7 @@ const Settings = () => {
           <Button 
             onClick={handleSaveSettings} 
             className="flex items-center gap-2"
-            disabled={isLoading || !canManageSettings}
+            disabled={isLoading}
           >
             <Save className="h-4 w-4" />
             {isLoading ? 'Saving...' : 'Save Settings'}
@@ -441,10 +358,7 @@ const Settings = () => {
         </div>
       </main>
 
-      <AuthDialog 
-        open={showAuthDialog} 
-        onOpenChange={setShowAuthDialog} 
-      />
+
     </div>
   );
 };

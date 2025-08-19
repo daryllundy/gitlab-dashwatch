@@ -1,7 +1,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { loadSettings, saveSettings, Settings, defaultSettings } from '@/services/settingsService';
+import { loadSettings, saveSettings, defaultSettings } from '@/services/localStorageSettingsService';
 import { useToast } from '@/components/ui/use-toast';
+import type { Settings } from '@/types';
 
 interface SettingsContextType {
   settings: Settings;
@@ -24,11 +25,8 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
       setSettings(loadedSettings);
     } catch (error) {
       console.error('Failed to load settings:', error);
-      toast({
-        title: "Error loading settings",
-        description: "Failed to load your settings. Using defaults.",
-        variant: "destructive",
-      });
+      // Use default settings on error - localStorage service already handles error toasts
+      setSettings(defaultSettings);
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +38,6 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   }, []);
 
   const handleSaveSettings = async (newSettings: Settings) => {
-    setIsLoading(true);
     try {
       const success = await saveSettings(newSettings);
       if (success) {
@@ -51,17 +48,12 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
         });
         return true;
       }
+      // localStorage service already handles error toasts
       return false;
     } catch (error) {
       console.error('Failed to save settings:', error);
-      toast({
-        title: "Error saving settings",
-        description: "Failed to save your settings. Please try again.",
-        variant: "destructive",
-      });
+      // localStorage service already handles error toasts
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 

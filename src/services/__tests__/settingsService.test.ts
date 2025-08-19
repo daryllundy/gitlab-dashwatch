@@ -1,27 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { loadSettings, saveSettings, defaultSettings } from '../settingsService';
-import { supabase } from '@/lib/supabase';
 
-// Mock Supabase
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    auth: {
-      getUser: vi.fn(),
-    },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          data: [],
-          error: null,
-        })),
-      })),
-      delete: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve()),
-      })),
-      insert: vi.fn(() => Promise.resolve({ error: null })),
-    })),
-  },
-}));
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
 
 // Mock toast
 vi.mock('sonner', () => ({
@@ -31,155 +21,138 @@ vi.mock('sonner', () => ({
 describe('settingsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorageMock.getItem.mockReturnValue(null);
   });
 
   describe('loadSettings', () => {
-    it('returns default settings when user is not authenticated', async () => {
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: null },
-      });
+    it('returns default settings when no stored settings exist', async () => {
+      localStorageMock.getItem.mockReturnValue(null);
 
       const settings = await loadSettings();
       expect(settings).toEqual(defaultSettings);
     });
 
-    it('loads settings from Supabase when user is authenticated', async () => {
-      const mockUser = { id: 'test-user-id' };
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: mockUser },
-      });
-
-      const mockFromChain = {
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            data: [
+    it('loads settings from localStorage when they exist', async () => {
+      const mockStoredData = {
+        settings: {
+          gitlab: {
+            instances: [
               {
                 id: '1',
                 url: 'https://test.gitlab.com',
                 name: 'Test GitLab',
                 token: 'test-token',
               },
-            ],
-            error: null,
-          })),
-        })),
+            ]
+          },
+          uptime: defaultSettings.uptime,
+          dns: defaultSettings.dns,
+          servers: defaultSettings.servers,
+        },
+        version: '1.0.0',
+        lastUpdated: new Date().toISOString(),
       };
 
-      (supabase.from as any).mockReturnValue(mockFromChain);
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'dashwatch_settings') {
+          return JSON.stringify(mockStoredData);
+        }
+        if (key === 'dashwatch_settings_version') {
+          return '1.0.0';
+        }
+        return null;
+      });
 
       const settings = await loadSettings();
 
-      expect(supabase.from).toHaveBeenCalledWith('gitlab_instances');
       expect(settings.gitlab.instances).toHaveLength(1);
       expect(settings.gitlab.instances[0].name).toBe('Test GitLab');
     });
 
-    it('handles Supabase errors gracefully', async () => {
-      const mockUser = { id: 'test-user-id' };
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: mockUser },
+    it('handles localStorage errors gracefully', async () => {
+      localStorageMock.getItem.mockImplementation(() => {
+        throw new Error('localStorage error');
       });
-
-      const mockFromChain = {
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            data: null,
-            error: new Error('Database error'),
-          })),
-        })),
-      };
-
-      (supabase.from as any).mockReturnValue(mockFromChain);
 
       const settings = await loadSettings();
       expect(settings).toEqual(defaultSettings);
     });
 
-    it('uses defaults when no data is returned for a section', async () => {
-      const mockUser = { id: 'test-user-id' };
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: mockUser },
-      });
-
-      const mockFromChain = {
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            data: [], // Empty array
-            error: null,
-          })),
-        })),
-      };
-
-      (supabase.from as any).mockReturnValue(mockFromChain);
+    it('returns defaults when stored settings are corrupted', async () => {
+      localStorageMock.getItem.mockReturnValue('invalid json');
 
       const settings = await loadSettings();
-      
-      // Should use defaults when sections are empty
-      expect(settings.gitlab).toEqual(defaultSettings.gitlab);
-      expect(settings.uptime).toEqual(defaultSettings.uptime);
+      expect(settings).toEqual(defaultSettings);
+    });
+
+    it('returns defaults when localStorage is not available', async () => {
+      // Mock localStorage as unavailable
+      Object.defineProperty(window, 'localStorage', {
+        value: undefined,
+        configurable: true,
+      });
+
+      const settings = await loadSettings();
+      expect(settings).toEqual(defaultSettings);
+
+      // Restore localStorage mock
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock,
+        configurable: true,
+      });
     });
   });
 
   describe('saveSettings', () => {
-    it('returns false when user is not authenticated', async () => {
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: null },
-      });
-
-      const result = await saveSettings(defaultSettings);
-      expect(result).toBe(false);
-    });
-
-    it('saves settings to Supabase when user is authenticated', async () => {
-      const mockUser = { id: 'test-user-id' };
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: mockUser },
-      });
-
-      const mockDeleteChain = {
-        eq: vi.fn(() => Promise.resolve()),
-      };
-
-      const mockInsertChain = {
-        error: null,
-      };
-
-      const mockFromMethod = vi.fn(() => ({
-        delete: vi.fn(() => mockDeleteChain),
-        insert: vi.fn(() => Promise.resolve(mockInsertChain)),
-      }));
-
-      (supabase.from as any).mockImplementation(mockFromMethod);
-
+    it('saves settings to localStorage successfully', async () => {
       const result = await saveSettings(defaultSettings);
 
       expect(result).toBe(true);
-      expect(supabase.from).toHaveBeenCalledWith('gitlab_instances');
-      expect(supabase.from).toHaveBeenCalledWith('uptime_websites');
-      expect(supabase.from).toHaveBeenCalledWith('dns_domains');
-      expect(supabase.from).toHaveBeenCalledWith('server_instances');
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'dashwatch_settings',
+        expect.stringContaining('"settings"')
+      );
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'dashwatch_settings_version',
+        '1.0.0'
+      );
     });
 
-    it('handles save errors gracefully', async () => {
-      const mockUser = { id: 'test-user-id' };
-      (supabase.auth.getUser as any).mockResolvedValue({
-        data: { user: mockUser },
+    it('handles localStorage quota exceeded error', async () => {
+      localStorageMock.setItem.mockImplementation(() => {
+        const error = new Error('QuotaExceededError');
+        error.name = 'QuotaExceededError';
+        throw error;
       });
-
-      const mockFromMethod = vi.fn()
-        .mockReturnValue({
-          delete: vi.fn(() => ({
-            eq: vi.fn(() => Promise.resolve()),
-          })),
-          insert: vi.fn(() => Promise.resolve({ 
-            error: new Error('Insert failed') 
-          })),
-        });
-
-      (supabase.from as any).mockImplementation(mockFromMethod);
 
       const result = await saveSettings(defaultSettings);
       expect(result).toBe(false);
+    });
+
+    it('handles other localStorage errors', async () => {
+      localStorageMock.setItem.mockImplementation(() => {
+        throw new Error('localStorage error');
+      });
+
+      const result = await saveSettings(defaultSettings);
+      expect(result).toBe(false);
+    });
+
+    it('returns false when localStorage is not available', async () => {
+      // Mock localStorage as unavailable
+      Object.defineProperty(window, 'localStorage', {
+        value: undefined,
+        configurable: true,
+      });
+
+      const result = await saveSettings(defaultSettings);
+      expect(result).toBe(false);
+
+      // Restore localStorage mock
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock,
+        configurable: true,
+      });
     });
   });
 
