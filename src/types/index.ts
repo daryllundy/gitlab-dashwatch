@@ -59,29 +59,4 @@ export interface ApiResponse<T> {
   loading: boolean;
 }
 
-// Environment credentials types
-export interface EnvAccount {
-  name: string;
-  email: string;
-  password: string;
-  role?: string;
-  displayName?: string;
-}
 
-export interface EnvCredentialsConfig {
-  enabled: boolean;
-  autoSignIn: boolean;
-  accounts: EnvAccount[];
-  defaultAccount?: string;
-  allowFallback: boolean;
-  strictMode: boolean;
-}
-
-// Authentication method types
-export type AuthenticationMethod = 'manual' | 'environment';
-
-export interface AuthenticationSource {
-  method: AuthenticationMethod;
-  accountName?: string; // For environment auth, the account name used
-  timestamp: Date;
-}
