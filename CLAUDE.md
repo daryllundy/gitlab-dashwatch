@@ -33,7 +33,7 @@ This is a React dashboard application built with TypeScript and Vite for monitor
 - **UI Framework**: shadcn/ui components built on Radix UI
 - **Styling**: Tailwind CSS with custom animations
 - **State Management**: React Context (SettingsContext) + TanStack Query
-- **Backend**: Supabase for settings persistence and user authentication
+- **Storage**: Browser localStorage for settings persistence
 - **Routing**: React Router v6
 
 ### Project Organization
@@ -60,7 +60,7 @@ The codebase follows strict organizational principles:
 - `src/constants/` - Application constants and defaults
 - `src/services/` - External API integrations
 
-**Settings Management**: Centralized through `SettingsContext` which handles loading/saving configurations to Supabase. All monitoring targets are user-configurable.
+**Settings Management**: Centralized through `SettingsContext` which handles loading/saving configurations to browser localStorage. All monitoring targets are user-configurable.
 
 ### Component Structure
 
@@ -74,9 +74,7 @@ The codebase follows strict organizational principles:
 
 ### Environment Configuration
 
-The app expects these environment variables:
-- `VITE_SUPABASE_URL` - Supabase project URL
-- `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
+No environment variables are required for basic operation. The application runs without authentication and stores all settings locally in the browser.
 
 ### Styling Approach
 
@@ -84,10 +82,10 @@ Uses Tailwind CSS with custom animations defined in `src/index.css`. Components 
 
 ### Data Flow
 
-1. Settings are loaded on app initialization via SettingsContext
+1. Settings are loaded on app initialization via SettingsContext from localStorage
 2. Each monitoring section reads relevant settings and performs status checks
 3. Status updates are displayed through StatusCard components
-4. User can modify settings through the Settings page, which saves to Supabase
+4. User can modify settings through the Settings page, which saves to localStorage
 5. Changes trigger re-renders across relevant monitoring sections
 
 ### GitLab Integration Notes
@@ -106,7 +104,7 @@ The application supports multiple deployment options:
 - **Production Image**: Multi-stage build with Nginx serving static files
 - **Development Image**: Node.js with hot reload for development
 - **Port Configuration**: Development (8080), Production (3000 → 80)
-- **Environment Variables**: Configured via `.env` file or docker-compose
+- **Environment Variables**: No configuration required
 
 ### Hosting Options
 The Docker container can be deployed to:

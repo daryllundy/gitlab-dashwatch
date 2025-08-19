@@ -22,7 +22,6 @@ src/
 │   └── SettingsContext.tsx
 ├── hooks/              # Custom React hooks
 ├── lib/                # Utility libraries
-│   ├── supabase.ts    # Supabase client
 │   └── utils.ts       # General utilities
 ├── pages/              # Page components
 ├── services/           # API and external services
@@ -60,6 +59,7 @@ src/
 - React Context for global state (settings)
 - TanStack Query for server state
 - Local state for component-specific data
+- Browser localStorage for settings persistence
 
 ## File Naming Conventions
 

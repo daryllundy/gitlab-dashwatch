@@ -5,9 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-https://your-project.supabase.co}
-        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-your-anon-key-here}
     ports:
       - "3000:80"
     restart: unless-stopped
@@ -30,9 +27,6 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    environment:
-      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-https://your-project.supabase.co}
-      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-your-anon-key-here}
     command: npm run dev
     networks:
       - dashwatch-network

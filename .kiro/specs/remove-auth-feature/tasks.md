@@ -172,15 +172,15 @@
   - Remove authentication environment variables
   - _Requirements: 2.2, 5.1, 5.2, 5.3_
 
-- [-] 12. Update documentation and deployment
-- [-] 12.1 Update README and documentation
+- [x] 12. Update documentation and deployment
+- [x] 12.1 Update README and documentation
 
   - Remove authentication setup instructions
   - Update deployment instructions to remove Supabase requirements
   - Update feature descriptions to reflect unauthenticated usage
   - _Requirements: 5.2, 5.3_
 
-- [ ] 12.2 Update Docker configuration
+- [x] 12.2 Update Docker configuration
   - Remove authentication environment variables from Docker files
   - Update docker-compose.yml to remove Supabase configuration
   - Test Docker build without authentication dependencies
