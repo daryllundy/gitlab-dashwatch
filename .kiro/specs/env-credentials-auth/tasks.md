@@ -88,7 +88,7 @@
   - Create tests for mixed authentication scenarios (env + manual)
   - _Requirements: 2.4, 3.2, 5.1, 5.2_
 
-- [ ] 12. Add role-based access control for environment accounts
+- [x] 12. Add role-based access control for environment accounts
   - Implement role validation for environment accounts if role is specified
   - Add role-based UI restrictions and permissions
   - Create role management integration with existing user context

@@ -609,6 +609,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isEnvStrictMode,
     isEnvAuthReady: envCredentialsService.isReady(),
     authenticationSource,
+    // Role-based access control
+    userRoleInfo,
+    hasPermission: (permission: import('@/services/roleService').Permission) => 
+      roleService.hasPermission(userRoleInfo, permission),
+    canManageSettings: roleService.canManageSettings(userRoleInfo),
+    canViewSettings: roleService.canViewSettings(userRoleInfo),
+    canManageGitlab: roleService.canManageGitlab(userRoleInfo),
+    canManageMonitoring: roleService.canManageMonitoring(userRoleInfo),
+    isAdmin: roleService.isAdmin(userRoleInfo),
   };
 
   return (

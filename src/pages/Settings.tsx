@@ -12,59 +12,74 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthDialog } from '@/components/auth';
 import { PageLayout } from '@/components/common';
 
+type SettingsCategory = 'gitlab' | 'uptime' | 'dns' | 'servers';
+
 const Settings = () => {
   const { settings: savedSettings, saveSettings, isLoading } = useSettings();
-  const { user } = useAuth();
+  const { user, canManageSettings, canViewSettings, userRoleInfo } = useAuth();
   const [settings, setSettings] = useState(savedSettings);
   const [activeTab, setActiveTab] = useState("gitlab");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
 
-  // Update local settings when savedSettings changes
   useEffect(() => {
-    setSettings(savedSettings);
+    if (savedSettings) {
+      setSettings(savedSettings);
+    }
   }, [savedSettings]);
 
+  // Don't render if settings are not loaded yet
+  if (!settings || !settings.gitlab || !settings.uptime || !settings.dns || !settings.servers) {
+    return <div>Loading...</div>;
+  }
+
   // Generic function to add an item to any settings category
-  const addItem = (category, itemTemplate) => {
-    setSettings(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [Array.isArray(prev[category]) ? 'items' : Object.keys(prev[category])[0]]: [
-          ...prev[category][Object.keys(prev[category])[0]],
-          itemTemplate
-        ]
-      }
-    }));
+  const addItem = (category: SettingsCategory, itemTemplate: any) => {
+    setSettings((prev: any) => {
+      const arrayKey = category === 'dns' ? 'domains' : (category === 'uptime' ? 'websites' : 'instances');
+      return {
+        ...prev,
+        [category]: {
+          ...prev[category],
+          [arrayKey]: [...prev[category][arrayKey], itemTemplate],
+        },
+      };
+    });
   };
 
   // Generic function to remove an item from any settings category
-  const removeItem = (category, arrayKey, index) => {
-    setSettings(prev => {
+  const removeItem = (category: SettingsCategory, index: number) => {
+    setSettings((prev: any) => {
+      const arrayKey = category === 'dns' ? 'domains' : (category === 'uptime' ? 'websites' : 'instances');
       const newArray = [...prev[category][arrayKey]];
       newArray.splice(index, 1);
       return {
         ...prev,
         [category]: {
           ...prev[category],
-          [arrayKey]: newArray
-        }
+          [arrayKey]: newArray,
+        },
       };
     });
   };
 
   // Generic function to update a specific item's property
-  const updateItemProperty = (category, arrayKey, index, property, value) => {
-    setSettings(prev => {
+  const updateItemProperty = (
+    category: SettingsCategory,
+    index: number,
+    property: string,
+    value: any
+  ) => {
+    setSettings((prev: any) => {
+      const arrayKey = category === 'dns' ? 'domains' : (category === 'uptime' ? 'websites' : 'instances');
       const newArray = [...prev[category][arrayKey]];
       newArray[index] = { ...newArray[index], [property]: value };
       return {
         ...prev,
         [category]: {
           ...prev[category],
-          [arrayKey]: newArray
-        }
+          [arrayKey]: newArray,
+        },
       };
     });
   };
@@ -74,8 +89,37 @@ const Settings = () => {
       setShowAuthDialog(true);
       return;
     }
+    if (!canManageSettings) {
+      return; // Should not happen due to UI restrictions, but safety check
+    }
     await saveSettings(settings);
   };
+
+  // Check if user has permission to view settings
+  if (!canViewSettings) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8 animate-slide-in">
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground mt-2">
+              Configure your monitoring dashboard
+            </p>
+          </div>
+          
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Access Denied:</strong> You don't have permission to view settings. 
+              {userRoleInfo.isEnvironmentAccount && userRoleInfo.accountName && (
+                <span> Your environment account "{userRoleInfo.accountName}" has {userRoleInfo.role} role.</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -104,7 +148,20 @@ const Settings = () => {
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        {user && !canManageSettings && (
+          <Alert className="mb-6">
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Read-Only Mode:</strong> You have view-only access to settings. 
+              {userRoleInfo.isEnvironmentAccount && userRoleInfo.accountName && (
+                <span> Your environment account "{userRoleInfo.accountName}" has {userRoleInfo.role} role.</span>
+              )}
+              {' '}Contact an administrator to modify settings.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <Tabs defaultValue="gitlab" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="gitlab" className="flex items-center gap-2">
               <Gitlab className="h-4 w-4" />
@@ -133,7 +190,7 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {settings.gitlab.instances.map((instance, index) => (
+                {settings.gitlab.instances.map((instance: any, index: number) => (
                   <div key={index} className="space-y-2 p-4 border rounded-lg">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -141,7 +198,8 @@ const Settings = () => {
                         <Input
                           id={`gitlab-name-${index}`}
                           value={instance.name}
-                          onChange={(e) => updateItemProperty('gitlab', 'instances', index, 'name', e.target.value)}
+                          onChange={(e) => updateItemProperty('gitlab', index, 'name', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -149,7 +207,8 @@ const Settings = () => {
                         <Input
                           id={`gitlab-url-${index}`}
                           value={instance.url}
-                          onChange={(e) => updateItemProperty('gitlab', 'instances', index, 'url', e.target.value)}
+                          onChange={(e) => updateItemProperty('gitlab', index, 'url', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
@@ -159,15 +218,17 @@ const Settings = () => {
                         id={`gitlab-token-${index}`}
                         type="password"
                         value={instance.token}
-                        onChange={(e) => updateItemProperty('gitlab', 'instances', index, 'token', e.target.value)}
+                        onChange={(e) => updateItemProperty('gitlab', index, 'token', e.target.value)}
                         placeholder="Personal access token for private repositories"
+                        disabled={!canManageSettings}
                       />
                     </div>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => removeItem('gitlab', 'instances', index)}
+                      onClick={() => removeItem('gitlab', index)}
                       className="mt-2"
+                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
@@ -177,6 +238,7 @@ const Settings = () => {
                   onClick={() => addItem('gitlab', { url: '', name: 'New GitLab Instance', token: '' })}
                   className="w-full"
                   variant="outline"
+                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add GitLab Instance
                 </Button>
@@ -193,7 +255,7 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {settings.uptime.websites.map((website, index) => (
+                {settings.uptime.websites.map((website: any, index: number) => (
                   <div key={index} className="space-y-2 p-4 border rounded-lg">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -201,7 +263,8 @@ const Settings = () => {
                         <Input
                           id={`website-name-${index}`}
                           value={website.name}
-                          onChange={(e) => updateItemProperty('uptime', 'websites', index, 'name', e.target.value)}
+                          onChange={(e) => updateItemProperty('uptime', index, 'name', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -209,24 +272,27 @@ const Settings = () => {
                         <Input
                           id={`website-url-${index}`}
                           value={website.url}
-                          onChange={(e) => updateItemProperty('uptime', 'websites', index, 'url', e.target.value)}
+                          onChange={(e) => updateItemProperty('uptime', index, 'url', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => removeItem('uptime', 'websites', index)}
+                      onClick={() => removeItem('uptime', index)}
                       className="mt-2"
+                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
                   </div>
                 ))}
                 <Button
-                  onClick={() => addItem('uptime', { url: '', name: 'New Website' })}
+                  onClick={() => addItem('uptime', { url: '', name: 'New Website' } as any)}
                   className="w-full"
                   variant="outline"
+                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Website
                 </Button>
@@ -243,7 +309,7 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {settings.dns.domains.map((domain, index) => (
+                {settings.dns.domains.map((domain: any, index: number) => (
                   <div key={index} className="space-y-2 p-4 border rounded-lg">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -251,7 +317,8 @@ const Settings = () => {
                         <Input
                           id={`domain-name-${index}`}
                           value={domain.domain}
-                          onChange={(e) => updateItemProperty('dns', 'domains', index, 'domain', e.target.value)}
+                          onChange={(e) => updateItemProperty('dns', index, 'domain', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -261,26 +328,29 @@ const Settings = () => {
                           value={domain.recordTypes.join(',')}
                           onChange={(e) => {
                             const recordTypes = e.target.value.split(',').map(type => type.trim());
-                            updateItemProperty('dns', 'domains', index, 'recordTypes', recordTypes);
+                            updateItemProperty('dns', index, 'recordTypes', recordTypes);
                           }}
                           placeholder="A,CNAME,MX,TXT"
+                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => removeItem('dns', 'domains', index)}
+                      onClick={() => removeItem('dns', index)}
                       className="mt-2"
+                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
                   </div>
                 ))}
                 <Button
-                  onClick={() => addItem('dns', { domain: '', recordTypes: ['A'] })}
+                  onClick={() => addItem('dns', { domain: '', recordTypes: ['A'] } as any)}
                   className="w-full"
                   variant="outline"
+                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Domain
                 </Button>
@@ -297,7 +367,7 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {settings.servers.instances.map((server, index) => (
+                {settings.servers.instances.map((server: any, index: number) => (
                   <div key={index} className="space-y-2 p-4 border rounded-lg">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -305,7 +375,8 @@ const Settings = () => {
                         <Input
                           id={`server-name-${index}`}
                           value={server.name}
-                          onChange={(e) => updateItemProperty('servers', 'instances', index, 'name', e.target.value)}
+                          onChange={(e) => updateItemProperty('servers', index, 'name', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                       <div>
@@ -313,7 +384,8 @@ const Settings = () => {
                         <Input
                           id={`server-ip-${index}`}
                           value={server.ip}
-                          onChange={(e) => updateItemProperty('servers', 'instances', index, 'ip', e.target.value)}
+                          onChange={(e) => updateItemProperty('servers', index, 'ip', e.target.value)}
+                          disabled={!canManageSettings}
                         />
                       </div>
                     </div>
@@ -322,8 +394,9 @@ const Settings = () => {
                       <Input
                         id={`server-netdata-${index}`}
                         value={server.netdataUrl}
-                        onChange={(e) => updateItemProperty('servers', 'instances', index, 'netdataUrl', e.target.value)}
+                        onChange={(e) => updateItemProperty('servers', index, 'netdataUrl', e.target.value)}
                         placeholder="http://ip-address:19999"
+                        disabled={!canManageSettings}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         Default Netdata port is 19999. URL should include protocol (http/https).
@@ -332,8 +405,9 @@ const Settings = () => {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => removeItem('servers', 'instances', index)}
+                      onClick={() => removeItem('servers', index)}
                       className="mt-2"
+                      disabled={!canManageSettings}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remove
                     </Button>
@@ -343,6 +417,7 @@ const Settings = () => {
                   onClick={() => addItem('servers', { name: 'New Server', ip: '', netdataUrl: '' })}
                   className="w-full"
                   variant="outline"
+                  disabled={!canManageSettings}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Server
                 </Button>
@@ -358,7 +433,7 @@ const Settings = () => {
           <Button 
             onClick={handleSaveSettings} 
             className="flex items-center gap-2"
-            disabled={isLoading}
+            disabled={isLoading || !canManageSettings}
           >
             <Save className="h-4 w-4" />
             {isLoading ? 'Saving...' : 'Save Settings'}

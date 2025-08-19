@@ -11,7 +11,7 @@ const Navbar = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, canViewSettings } = useAuth();
 
   React.useEffect(() => {
     // Check if dark mode is already set
@@ -52,16 +52,18 @@ const Navbar = () => {
             >
               Dashboard
             </Link>
-            <Link 
-              to="/settings" 
-              className={`px-3 py-2 text-sm font-medium rounded-md ${
-                location.pathname === '/settings' 
-                  ? 'text-primary bg-primary/10' 
-                  : 'text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              Settings
-            </Link>
+            {canViewSettings && (
+              <Link 
+                to="/settings" 
+                className={`px-3 py-2 text-sm font-medium rounded-md ${
+                  location.pathname === '/settings' 
+                    ? 'text-primary bg-primary/10' 
+                    : 'text-muted-foreground hover:bg-muted'
+                }`}
+              >
+                Settings
+              </Link>
+            )}
           </nav>
         </div>
         
@@ -74,13 +76,15 @@ const Navbar = () => {
             {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
           
-          <button
-            onClick={() => navigate('/settings')}
-            className="p-2 rounded-md text-muted-foreground hover:bg-muted sm:hidden"
-            aria-label="Settings"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
+          {canViewSettings && (
+            <button
+              onClick={() => navigate('/settings')}
+              className="p-2 rounded-md text-muted-foreground hover:bg-muted sm:hidden"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5" />
+            </button>
+          )}
 
           {user ? (
             <UserMenu />

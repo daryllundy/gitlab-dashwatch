@@ -13,9 +13,10 @@ import { LogOut, Settings, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants';
+import { roleService } from '@/services/roleService';
 
 export const UserMenu: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, userRoleInfo, canViewSettings } = useAuth();
   const navigate = useNavigate();
 
   if (!user) return null;
@@ -50,15 +51,20 @@ export const UserMenu: React.FC = () => {
               {user.email}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              Signed in
+              {roleService.getRoleDisplayName(userRoleInfo.role)}
+              {userRoleInfo.isEnvironmentAccount && userRoleInfo.accountName && (
+                <span> • {userRoleInfo.accountName}</span>
+              )}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSettingsClick}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
-        </DropdownMenuItem>
+        {canViewSettings && (
+          <DropdownMenuItem onClick={handleSettingsClick}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
