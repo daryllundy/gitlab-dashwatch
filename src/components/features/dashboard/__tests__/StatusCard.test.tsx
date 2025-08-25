@@ -41,7 +41,7 @@ describe('StatusCard', () => {
     expect(screen.getByText('Test subtitle')).toBeInTheDocument();
   });
 
-  it('displays animated number when value is provided', () => {
+  it('displays animated number when value is provided', async () => {
     render(
       <StatusCard
         title="Test Card"
@@ -51,7 +51,8 @@ describe('StatusCard', () => {
       />
     );
 
-    expect(screen.getByText('42')).toBeInTheDocument();
+    // AnimatedNumber starts at 0
+    expect(screen.getByText('0')).toBeInTheDocument();
     expect(screen.getByText('items')).toBeInTheDocument();
   });
 

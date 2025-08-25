@@ -129,7 +129,19 @@ describe('localStorageSettingsService', () => {
     });
 
     it('should detect corrupted settings', async () => {
-      localStorageMock.setItem('dashwatch_settings', 'invalid json');
+      // Set settings with invalid structure that will fail validation
+      const invalidSettings = {
+        settings: {
+          gitlab: null, // This should fail validation
+          uptime: { websites: [] },
+          dns: { domains: [] },
+          servers: { instances: [] }
+        },
+        version: '1.0.0',
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorageMock.setItem('dashwatch_settings', JSON.stringify(invalidSettings));
       
       const result = await checkSettingsIntegrity();
       expect(result.isValid).toBe(false);
