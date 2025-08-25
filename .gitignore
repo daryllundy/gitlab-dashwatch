@@ -1,26 +1,167 @@
-# Logs
-logs
-*.log
+# Dependencies
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.pnpm-store/
 
-node_modules
-dist
-dist-ssr
+# Build outputs
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.vite/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs/
+*.log
+.npm/
+.eslintcache
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
 *.local
+
+# Security and sensitive files
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+secrets/
+config/secrets.*
+auth.json
+credentials.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database.json
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+test-results/
+playwright-report/
+test-results.xml
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
+
+# OS generated files
+.AppleDouble
+.LSOverride
+Icon?
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# Package managers
+.yarn/
+.pnp.*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.js
+package-lock.json.bak
+yarn.lock.bak
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Runtime and cache
+.cache/
+.vite/
+.turbo/
+.next/
+.nuxt/
+.output/
+.vercel/
+.netlify/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*~
+
+# History and local development
 .history/
+.vscode-test/
+
+# Supabase
+.supabase/
+
+# Kiro IDE
+.kiro/cache/
+.kiro/logs/
+
+# Monitoring and analytics
+.sentry/
+newrelic_agent.log
+
+# Miscellaneous
+*.tgz
+*.tar.gz
+*.zip
+*.rar
+*.7z
