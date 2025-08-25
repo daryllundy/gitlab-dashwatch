@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AuthLogger, AuthEventType, AuthEventLevel, authLogger } from '../authLogger';
+import { AuthLogger, authLogger } from '../auth/authLogger';
+import { AuthEventType, AuthEventLevel } from '@/types';
 import type { AuthenticationSource } from '@/types';
 
 describe('AuthLogger', () => {
@@ -285,7 +286,8 @@ describe('AuthLogger', () => {
     });
 
     it('should log manual sign-in failures', () => {
-      logger.logManualSignInFailure('invalid_credentials', 1000);
+      const testDuration = 1000;
+      logger.logManualSignInFailure('invalid_credentials', testDuration);
 
       const logs = logger.getRecentLogs(1);
       expect(logs[0]).toMatchObject({
@@ -295,7 +297,7 @@ describe('AuthLogger', () => {
         metadata: {
           authMethod: 'manual',
           errorType: 'invalid_credentials',
-          duration: 1000
+          duration: testDuration
         }
       });
     });
@@ -428,9 +430,11 @@ describe('AuthLogger', () => {
     beforeEach(() => {
       // Create a comprehensive set of logs for audit testing
       logger.logEnvSignInAttempt('admin');
-      logger.logEnvSignInSuccess('admin', 1000);
+      const testDuration1 = 1000;
+      logger.logEnvSignInSuccess('admin', testDuration1);
       logger.logEnvSignInAttempt('user');
-      logger.logEnvSignInFailure('user', 'invalid_credentials', 1500);
+      const testDuration2 = 1500;
+      logger.logEnvSignInFailure('user', 'invalid_credentials', testDuration2);
       logger.logAutoSignInAttempt('admin');
       logger.logAutoSignInSuccess('admin', 800);
       logger.logManualSignInAttempt();

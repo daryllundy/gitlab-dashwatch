@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { roleService, UserRole, Permission } from '../roleService';
+import { roleService, UserRole, Permission } from '../auth/roleService';
 import type { User } from '@supabase/supabase-js';
 import type { EnvAccount, AuthenticationSource } from '@/types';
 

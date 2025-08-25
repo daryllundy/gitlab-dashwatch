@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { loadSettings, saveSettings, defaultSettings } from '@/services/localStorageSettingsService';
+import { loadSettings, saveSettings, defaultSettings } from '@/services';
 import { useToast } from '@/components/ui/use-toast';
 import type { Settings } from '@/types';
 

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/layout';
 import { useSettings } from '@/contexts/SettingsContext';
 import { 
   Gitlab, ArrowLeft, GitBranch, GitPullRequest, 
   AlertCircle, ExternalLink, RefreshCw, Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import StatusIndicator from '@/components/StatusIndicator';
+import { StatusIndicator } from '@/components/features/dashboard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';

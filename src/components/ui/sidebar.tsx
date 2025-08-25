@@ -17,12 +17,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const SIDEBAR_COOKIE_NAME = "sidebar:state"
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "16rem"
-const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
-const SIDEBAR_KEYBOARD_SHORTCUT = "b"
+import { UI_CONFIG } from "@/config"
+
+const SIDEBAR_COOKIE_NAME = UI_CONFIG.sidebar.cookieName
+const SIDEBAR_COOKIE_MAX_AGE = UI_CONFIG.sidebar.cookieMaxAge
+const SIDEBAR_WIDTH = UI_CONFIG.sidebar.width
+const SIDEBAR_WIDTH_MOBILE = UI_CONFIG.sidebar.widthMobile
+const SIDEBAR_WIDTH_ICON = UI_CONFIG.sidebar.widthIcon
+const SIDEBAR_KEYBOARD_SHORTCUT = UI_CONFIG.sidebar.keyboardShortcut
 
 type SidebarContext = {
   state: "expanded" | "collapsed"

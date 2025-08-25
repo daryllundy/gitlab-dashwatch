@@ -1,13 +1,8 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import { ErrorBoundary } from './ErrorBoundary';
+import { Navbar } from '@/components/layout';
+import { ErrorBoundary } from '@/components/common';
 
-interface PageLayoutProps {
-  children: React.ReactNode;
-  title?: string;
-  description?: string;
-  showNavbar?: boolean;
-}
+import type { PageLayoutProps } from '@/types';
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
   children,

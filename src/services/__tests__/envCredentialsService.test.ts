@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { EnvCredentialsService } from '../envCredentialsService';
+import { EnvCredentialsService } from '../auth/envCredentialsService';
 import * as envConfig from '../../config/env';
 
 // Mock the env config module

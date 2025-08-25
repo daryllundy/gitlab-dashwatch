@@ -303,6 +303,51 @@ asciinema play docs/demos/production-deploy-demo.cast
 📁 **Local Files**: All demo recordings are available in [`docs/demos/`](docs/demos/) directory.  
 📚 **Documentation**: See [`docs/demos/README.md`](docs/demos/README.md) for detailed information.
 
+## Architecture & Code Organization
+
+### Component Organization Strategy
+
+**Common Components** (`src/components/common/`)
+- Reusable components used across multiple features
+- Examples: `ErrorBoundary`, `LoadingSpinner`, `PageLayout`
+- Should have minimal dependencies and be highly reusable
+
+**UI Components** (`src/components/ui/`)
+- shadcn/ui components and base UI primitives
+- Maintained as provided by shadcn/ui
+- Should not contain business logic
+
+**Feature Components** (`src/components/features/`)
+- Components specific to particular features
+- Organized by feature domain (dashboard, gitlab, uptime, dns, server)
+- Can import from common and ui components
+
+**Layout Components** (`src/components/layout/`)
+- Components that define application layout
+- Examples: `Navbar`, `Sidebar`, `Footer`
+- Used across multiple pages
+
+### State Management Patterns
+
+- **Global State**: React Context (`SettingsContext`)
+- **Server State**: TanStack Query for API calls
+- **Local State**: `useState` for component-specific data
+- **Settings Storage**: Browser localStorage with service layer abstraction
+
+### Error Handling Strategy
+
+- Global `ErrorBoundary` wraps the entire application
+- Feature-specific error boundaries for major sections
+- Component-level error states for graceful degradation
+- Consistent error logging and user feedback through `src/lib/error.ts`
+
+### Testing Structure
+
+- Tests co-located with components in `__tests__` folders
+- Test utilities centralized in `src/test/`
+- MSW handlers for API mocking
+- Comprehensive coverage for critical paths
+
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
@@ -320,17 +365,93 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ```
 src/
-├── components/        # Reusable UI components
-│   ├── common/       # Common components (ErrorBoundary, Loading)
-│   └── ui/           # shadcn/ui components
-├── contexts/         # React contexts (Settings)
-├── hooks/            # Custom React hooks
-├── pages/            # Page components
-├── services/         # API services and utilities
-├── types/            # TypeScript type definitions
-├── config/           # Configuration files
-└── constants/        # Application constants
+├── components/           # React components
+│   ├── common/          # Reusable components (ErrorBoundary, LoadingSpinner, PageLayout)
+│   ├── ui/              # shadcn/ui components (button, card, dialog, etc.)
+│   ├── features/        # Feature-specific components
+│   │   ├── dashboard/   # Dashboard-related components
+│   │   ├── gitlab/      # GitLab monitoring components
+│   │   ├── uptime/      # Uptime monitoring components
+│   │   ├── dns/         # DNS monitoring components
+│   │   └── server/      # Server monitoring components
+│   └── layout/          # Layout components (Navbar, etc.)
+├── config/              # Configuration and environment handling
+├── constants/           # Application constants and defaults
+├── contexts/            # React contexts (SettingsContext)
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility libraries (utils, api, logger, etc.)
+├── pages/               # Page components (Index, Settings, NotFound)
+├── services/            # API services and external integrations
+│   ├── auth/           # Authentication services
+│   ├── monitoring/     # Monitoring-related services
+│   ├── settings/       # Settings management services
+│   └── storage/        # Data storage and export services
+├── test/                # Test utilities and mocks
+├── types/               # TypeScript type definitions
+└── main.tsx             # Application entry point
 ```
+
+#### File Naming Conventions
+
+- **Components**: PascalCase (`StatusCard.tsx`, `GitlabProjectList.tsx`)
+- **Hooks**: camelCase with `use` prefix (`useSettings.ts`, `useMobile.tsx`)
+- **Services**: camelCase (`settingsService.ts`, `gitlabApiService.ts`)
+- **Types**: PascalCase (`GitlabProject`, `StatusType`, `MonitoringConfig`)
+- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_SETTINGS`, `API_ENDPOINTS`)
+- **Pages**: PascalCase (`Index.tsx`, `Settings.tsx`)
+
+#### Import Patterns
+
+Use absolute imports with `@/` alias for clean, maintainable code:
+
+```typescript
+// React and third-party libraries
+import React from 'react';
+import { Button } from '@/components/ui/button';
+
+// Internal components (common → ui → features → layout)
+import { LoadingSpinner } from '@/components/common';
+import { GitlabProjectCard } from '@/components/features/gitlab';
+import { Navbar } from '@/components/layout';
+
+// Hooks and contexts
+import { useSettings } from '@/contexts/SettingsContext';
+
+// Services and utilities
+import { gitlabApiService } from '@/services';
+import { formatDate } from '@/lib/date';
+
+// Types and constants
+import type { GitlabProject } from '@/types';
+import { ROUTES } from '@/constants';
+```
+
+#### Developer Guidelines
+
+**Adding New Components:**
+- **Reusable components** → `src/components/common/`
+- **UI primitives** → `src/components/ui/` (shadcn/ui components)
+- **Feature-specific** → `src/components/features/[feature]/`
+- **Layout components** → `src/components/layout/`
+
+**Adding New Business Logic:**
+- **API services** → `src/services/[domain]/`
+- **Custom hooks** → `src/hooks/`
+- **Utility functions** → `src/lib/`
+
+**Adding New Types:**
+- **Centralized types** → `src/types/index.ts`
+- **Group by feature domain** (GitLab, monitoring, etc.)
+
+**Adding Configuration:**
+- **Environment handling** → `src/config/env.ts`
+- **App constants** → `src/constants/index.ts`
+- **Default configs** → `src/config/defaults.ts`
+
+**Writing Tests:**
+- **Co-locate with components** → `ComponentName/__tests__/ComponentName.test.tsx`
+- **Test utilities** → `src/test/`
+- **Integration tests** → `src/test/integration/`
 
 ## License
 

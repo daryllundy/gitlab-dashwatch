@@ -1,10 +1,10 @@
 
 import React, { useEffect } from 'react';
 import { PageLayout } from '@/components/common';
-import GitlabSection from '@/components/GitlabSection';
-import DnsSection from '@/components/DnsSection';
-import UptimeSection from '@/components/UptimeSection';
-import ServerSection from '@/components/ServerSection';
+import { GitlabSection } from '@/components/features/gitlab';
+import { DnsSection } from '@/components/features/dns';
+import { UptimeSection } from '@/components/features/uptime';
+import { ServerSection } from '@/components/features/server';
 
 const Index = () => {
   // Enable dark mode based on user preference

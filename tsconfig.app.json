@@ -26,7 +26,21 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/components/ui/*": ["./src/components/ui/*"],
+      "@/components/common/*": ["./src/components/common/*"],
+      "@/components/features/*": ["./src/components/features/*"],
+      "@/components/layout/*": ["./src/components/layout/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/contexts/*": ["./src/contexts/*"],
+      "@/types": ["./src/types/index.ts"],
+      "@/config": ["./src/config/index.ts"],
+      "@/constants": ["./src/constants/index.ts"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/test/*": ["./src/test/*"]
     }
   },
   "include": ["src"]

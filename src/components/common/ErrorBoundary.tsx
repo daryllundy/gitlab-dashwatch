@@ -3,17 +3,14 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
+import type { ErrorBoundaryProps } from '@/types';
 
 interface State {
   hasError: boolean;
   error?: Error;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   public state: State = {
     hasError: false,
   };
