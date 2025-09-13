@@ -10,6 +10,3 @@ export {
   importSettings,
   getStorageInfo
 } from './localStorageSettingsService';
-
-// Re-export for backward compatibility
-export { settingsService } from './settingsService';

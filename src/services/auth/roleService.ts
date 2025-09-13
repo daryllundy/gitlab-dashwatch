@@ -157,3 +157,4 @@ class RoleService {
 }
 
 export const roleService = new RoleService();
+export { Permission, UserRole };

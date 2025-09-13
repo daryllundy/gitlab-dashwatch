@@ -5,78 +5,47 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { config } from '@/config';
+import type { StatusType } from '@/types';
+
+interface DnsRecord {
+  id: number;
+  domain: string;
+  type: string;
+  value: string;
+  ttl: number;
+  status: StatusType;
+  lastCheck: string;
+}
 
 const DnsSection = () => {
-  const [dnsRecords, setDnsRecords] = useState([]);
+  const [dnsRecords, setDnsRecords] = useState<DnsRecord[]>([]);
   const navigate = useNavigate();
   const { settings } = useSettings();
 
   // Generate mock DNS records based on configured domains
   useEffect(() => {
-    if (settings.dns.domains.length === 0) {
-      // Default mock data if no real data is available
-      setDnsRecords([
-        {
-          id: 1,
-          domain: 'example.com',
-          type: 'A',
-          value: '192.168.1.1',
+    // Generate mock records based on configured domains
+    const newRecords: DnsRecord[] = [];
+    let id = 1;
+
+    settings.dns.domains.forEach(domain => {
+      domain.recordTypes.forEach(type => {
+        newRecords.push({
+          id: id++,
+          domain: domain.domain,
+          type,
+          value: getMockValueForRecordType(type, domain.domain),
           ttl: 3600,
-          status: 'healthy',
-          lastCheck: '5m ago',
-        },
-        {
-          id: 2,
-          domain: 'api.example.com',
-          type: 'CNAME',
-          value: 'example.com',
-          ttl: 3600,
-          status: 'healthy',
-          lastCheck: '5m ago',
-        },
-        {
-          id: 3,
-          domain: 'example.com',
-          type: 'MX',
-          value: 'mail.example.com',
-          ttl: 3600,
-          status: 'warning',
-          lastCheck: '10m ago',
-        },
-        {
-          id: 4,
-          domain: 'example.com',
-          type: 'TXT',
-          value: 'v=spf1 include:_spf.google.com ~all',
-          ttl: 3600,
-          status: 'healthy',
-          lastCheck: '15m ago',
-        },
-      ]);
-    } else {
-      // Generate mock records based on configured domains
-      const newRecords = [];
-      let id = 1;
-      
-      settings.dns.domains.forEach(domain => {
-        domain.recordTypes.forEach(type => {
-          newRecords.push({
-            id: id++,
-            domain: domain.domain,
-            type,
-            value: getMockValueForRecordType(type, domain.domain),
-            ttl: 3600,
-            status: getRandomStatus(),
-            lastCheck: `${Math.floor(Math.random() * 30) + 1}m ago`,
-          });
+          status: getRandomStatus(),
+          lastCheck: `${Math.floor(Math.random() * 30) + 1}m ago`,
         });
       });
-      
-      setDnsRecords(newRecords);
-    }
+    });
+
+    setDnsRecords(newRecords);
   }, [settings.dns.domains]);
 
-  const getMockValueForRecordType = (type, domain) => {
+  const getMockValueForRecordType = (type: string, domain: string): string => {
     switch (type) {
       case 'A':
         return `192.168.1.${Math.floor(Math.random() * 255)}`;
@@ -91,17 +60,21 @@ const DnsSection = () => {
     }
   };
 
-  const getRandomStatus = () => {
+  const getRandomStatus = (): StatusType => {
     const statuses = config.monitoring.mockData.statusDistribution;
-    return statuses[Math.floor(Math.random() * statuses.length)];
+    if (statuses.length === 0) {
+      return 'inactive';
+    }
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    return status || 'inactive';
   };
 
   const refreshRecords = () => {
     // This would be an API call in a real application
     // Just re-run the effect to generate new mock data
-    const newRecords = [];
+    const newRecords: DnsRecord[] = [];
     let id = 1;
-    
+
     settings.dns.domains.forEach(domain => {
       domain.recordTypes.forEach(type => {
         newRecords.push({
@@ -115,7 +88,7 @@ const DnsSection = () => {
         });
       });
     });
-    
+
     setDnsRecords(newRecords);
   };
 
@@ -131,7 +104,7 @@ const DnsSection = () => {
           <p className="text-sm text-muted-foreground mt-1">Status of your domain records</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             className="text-sm font-medium text-primary flex items-center gap-1"
@@ -140,8 +113,8 @@ const DnsSection = () => {
             <Settings className="h-4 w-4" />
             Configure
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             className="text-sm font-medium text-primary"
             onClick={refreshRecords}
@@ -150,7 +123,7 @@ const DnsSection = () => {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {dnsRecords.map((record, index) => (
           <StatusCard
@@ -158,7 +131,7 @@ const DnsSection = () => {
             title={`${record.domain}`}
             subtitle={`${record.type} Record`}
             icon={Globe}
-            status={record.status as any}
+            status={record.status}
             className="card-appear"
             style={{ '--delay': index + 1 } as React.CSSProperties}
           >

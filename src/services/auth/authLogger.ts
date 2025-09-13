@@ -11,19 +11,22 @@ export class AuthLogger {
     eventType: AuthEventType,
     level: AuthEventLevel,
     message: string,
-    metadata?: Record<string, unknown>
+    details?: Record<string, unknown>
   ): void {
     if (!this.enabled) return;
 
     const sanitizedMessage = this.sanitizeMessage(message);
-    const sanitizedMetadata = metadata ? this.sanitizeMetadata(metadata) : undefined;
+    const sanitizedDetails = details ? this.sanitizeMetadata(details) : {};
 
     const logEntry: AuthLogEntry = {
+      id: `${Date.now()}-${Math.random()}`,
       timestamp: new Date(),
       eventType,
-      level,
-      message: sanitizedMessage,
-      metadata: sanitizedMetadata
+      details: {
+        ...sanitizedDetails,
+        message: sanitizedMessage,
+        level,
+      }
     };
 
     this.logs.push(logEntry);
@@ -204,7 +207,7 @@ export class AuthLogger {
       AuthEventType.AUTH_SIGNOUT,
       AuthEventLevel.INFO,
       'User signed out',
-      { 
+      {
         authMethod: authSource.method,
         accountName: authSource.accountName
       }
@@ -216,7 +219,7 @@ export class AuthLogger {
       AuthEventType.AUTH_SESSION_RESTORED,
       AuthEventLevel.INFO,
       'Session restored from previous authentication',
-      { 
+      {
         authMethod: authSource.method,
         accountName: authSource.accountName
       }
@@ -235,7 +238,7 @@ export class AuthLogger {
   }
 
   getLogsByLevel(level: AuthEventLevel): AuthLogEntry[] {
-    return this.logs.filter(log => log.level === level);
+    return this.logs.filter(log => (log.details.level as AuthEventLevel) === level);
   }
 
   clearLogs(): void {
@@ -265,7 +268,7 @@ export class AuthLogger {
     const envAuthSuccesses = this.getLogsByType(AuthEventType.ENV_AUTH_ACCOUNT_SIGNIN_SUCCESS).length +
                             this.getLogsByType(AuthEventType.ENV_AUTH_AUTO_SIGNIN_SUCCESS).length;
     const envAuthFailures = this.getLogsByType(AuthEventType.ENV_AUTH_ACCOUNT_SIGNIN_FAILURE).length;
-    
+
     const manualAuthAttempts = this.getLogsByType(AuthEventType.MANUAL_AUTH_SIGNIN_ATTEMPT).length +
                               this.getLogsByType(AuthEventType.MANUAL_AUTH_OAUTH_ATTEMPT).length;
     const manualAuthSuccesses = this.getLogsByType(AuthEventType.MANUAL_AUTH_SIGNIN_SUCCESS).length +
@@ -279,8 +282,9 @@ export class AuthLogger {
     // Calculate account usage stats
     const accountUsageStats: Record<string, number> = {};
     this.logs.forEach(log => {
-      if (log.metadata?.accountName && typeof log.metadata.accountName === 'string') {
-        accountUsageStats[log.metadata.accountName] = (accountUsageStats[log.metadata.accountName] || 0) + 1;
+      const accountName = log.details.accountName;
+      if (accountName && typeof accountName === 'string') {
+        accountUsageStats[accountName] = (accountUsageStats[accountName] || 0) + 1;
       }
     });
 
@@ -307,7 +311,7 @@ export class AuthLogger {
       autoSignInAttempts,
       autoSignInSuccesses,
       fallbackToManualCount,
-      lastActivity: this.logs.length > 0 ? this.logs[this.logs.length - 1].timestamp : null,
+      lastActivity: this.logs.length > 0 ? this.logs[this.logs.length - 1]?.timestamp ?? null : null,
       mostUsedAuthMethod,
       accountUsageStats
     };
@@ -315,25 +319,25 @@ export class AuthLogger {
 
   private sanitizeMessage(message: string): string {
     let sanitized = message;
-    
+
     // Sanitize passwords
     sanitized = sanitized.replace(/password=[\w\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/gi, 'password=***');
-    
+
     // Sanitize environment variable passwords
     sanitized = sanitized.replace(/VITE_AUTH_ENV_ACCOUNT_\w+_PASSWORD=[\w\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/gi, 'VITE_AUTH_ENV_ACCOUNT_***_PASSWORD=***');
-    
+
     // Sanitize email addresses - fix the regex to avoid double replacement
     sanitized = sanitized.replace(/\b[\w\d._%+-]+@[\w\d.-]+\.[A-Za-z]{2,}\b/gi, '***@***');
-    
+
     // Sanitize tokens
     sanitized = sanitized.replace(/token=[\w\d]+/gi, 'token=***');
-    
+
     return sanitized;
   }
 
-  private sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
-    const sanitized = { ...metadata };
-    
+  private sanitizeMetadata(details: Record<string, unknown>): Record<string, unknown> {
+    const sanitized = { ...details };
+
     // Sanitize user agent strings
     if (sanitized.userAgent && typeof sanitized.userAgent === 'string') {
       sanitized.userAgent = sanitized.userAgent
@@ -341,28 +345,29 @@ export class AuthLogger {
         .replace(/\d+\.\d+/g, 'x.x.x')
         .replace(/\d+/g, 'x');
     }
-    
+
     return sanitized;
   }
 
   private outputToConsole(logEntry: AuthLogEntry): void {
-    const message = `${logEntry.eventType}: ${logEntry.message}`;
-    
-    switch (logEntry.level) {
+    const message = `${logEntry.eventType}: ${logEntry.details.message}`;
+
+    switch (logEntry.details.level) {
       case AuthEventLevel.DEBUG:
-        console.debug(message, logEntry.metadata);
+        console.debug(message, logEntry.details);
         break;
       case AuthEventLevel.INFO:
-        console.log(message, logEntry.metadata);
+        console.log(message, logEntry.details);
         break;
       case AuthEventLevel.WARN:
-        console.warn(message, logEntry.metadata);
+        console.warn(message, logEntry.details);
         break;
       case AuthEventLevel.ERROR:
-        console.error(message, logEntry.metadata);
+        console.error(message, logEntry.details);
         break;
     }
   }
 }
 
 export const authLogger = new AuthLogger();
+export { AuthEventType, AuthEventLevel };

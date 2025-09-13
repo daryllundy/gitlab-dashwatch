@@ -165,15 +165,15 @@ export enum Permission {
   // System administration
   SYSTEM_ADMIN = 'system:admin',
   MANAGE_USERS = 'users:manage',
-  
+
   // Settings management
   MANAGE_SETTINGS = 'settings:manage',
   VIEW_SETTINGS = 'settings:view',
-  
+
   // Monitoring management
   MANAGE_MONITORING = 'monitoring:manage',
   VIEW_MONITORING = 'monitoring:view',
-  
+
   // GitLab management
   MANAGE_GITLAB = 'gitlab:manage',
   VIEW_GITLAB = 'gitlab:view'
@@ -213,10 +213,12 @@ export enum AuthEventLevel {
 }
 
 export interface UserRoleInfo {
-  userId: string;
+  userId?: string;
   role: UserRole;
   permissions: Permission[];
-  assignedAt: Date;
+  assignedAt?: Date;
+  isEnvironmentAccount?: boolean;
+  accountName?: string;
 }
 
 export interface AuthLogEntry {
@@ -256,6 +258,12 @@ export interface EnvAccount {
   email: string;
   password: string;
   role?: string;
+}
+
+export interface AuthenticationSource {
+  method: 'environment' | 'manual' | 'oauth';
+  timestamp: Date;
+  accountName?: string;
 }
 
 export interface ValidationResult {
@@ -331,7 +339,7 @@ export interface ExportResult {
   recordCount: number;
 }
 
-export type ExportDataType = 
+export type ExportDataType =
   | 'settings'
   | 'monitoring-data'
   | 'uptime-stats'
@@ -447,5 +455,3 @@ export interface StatusCardProps {
   onClick?: () => void;
   style?: React.CSSProperties;
 }
-
-

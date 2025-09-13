@@ -7,17 +7,31 @@ import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { config } from '@/config';
+import type { StatusType } from '@/types';
+
+interface Server {
+  id: number;
+  name: string;
+  ip: string;
+  status: StatusType;
+  cpuUsage: number;
+  memoryUsage: number;
+  diskUsage: number;
+  uptime: string;
+  netdataUrl?: string;
+  error?: boolean;
+}
 
 // Function to fetch server metrics from Netdata
-const fetchNetdataMetrics = async (url) => {
+const fetchNetdataMetrics = async (url: string): Promise<any> => {
   try {
     // Cross-origin requests might be blocked, so this is a mock implementation
     // In production, you'd need a proxy server or CORS-enabled Netdata
     console.log(`Fetching metrics from Netdata: ${url}`);
-    
+
     // Simulating API response time
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // Mock response
     return {
       cpuUsage: Math.floor(Math.random() * 100),
@@ -32,7 +46,7 @@ const fetchNetdataMetrics = async (url) => {
 };
 
 const ServerSection = () => {
-  const [servers, setServers] = useState([]);
+  const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -108,15 +122,15 @@ const ServerSection = () => {
               }
 
               const metrics = await fetchNetdataMetrics(server.netdataUrl);
-              
+
               // Determine status based on metrics
-              let status = 'healthy';
+              let status: StatusType = 'healthy';
               if (metrics.cpuUsage > 80 || metrics.memoryUsage > 80 || metrics.diskUsage > 80) {
                 status = 'error';
               } else if (metrics.cpuUsage > 60 || metrics.memoryUsage > 60 || metrics.diskUsage > 60) {
                 status = 'warning';
               }
-              
+
               return {
                 id: index + 1,
                 name: server.name,
@@ -135,7 +149,7 @@ const ServerSection = () => {
                 id: index + 1,
                 name: server.name,
                 ip: server.ip,
-                status: 'error',
+                status: 'error' as StatusType,
                 cpuUsage: 0,
                 memoryUsage: 0,
                 diskUsage: 0,
@@ -145,7 +159,7 @@ const ServerSection = () => {
             }
           })
         );
-        
+
         setServers(serverData);
         setLoading(false);
       } catch (error) {
@@ -163,20 +177,24 @@ const ServerSection = () => {
 
     // Set up polling interval
     const interval = setInterval(fetchAllServerMetrics, config.monitoring.polling.serverMetrics);
-    
+
     return () => clearInterval(interval);
   }, [settings.servers.instances, toast]);
 
-  const getRandomStatus = () => {
+  const getRandomStatus = (): StatusType => {
     const statuses = config.monitoring.mockData.statusDistribution;
-    return statuses[Math.floor(Math.random() * statuses.length)];
+    if (statuses.length === 0) {
+      return 'inactive';
+    }
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    return status || 'inactive';
   };
 
   const navigateToSettings = () => {
     navigate('/settings');
   };
 
-  const openNetdataInterface = (server) => {
+  const openNetdataInterface = (server: Server) => {
     if (server.netdataUrl) {
       window.open(server.netdataUrl, '_blank');
     } else {
@@ -195,7 +213,7 @@ const ServerSection = () => {
           <h2 className="text-xl font-semibold tracking-tight">Server Monitoring</h2>
           <p className="text-sm text-muted-foreground mt-1">Hardware and system performance</p>
         </div>
-        <Button 
+        <Button
           variant="ghost"
           size="sm"
           className="text-sm font-medium text-primary flex items-center gap-1"
@@ -205,7 +223,7 @@ const ServerSection = () => {
           Configure
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {servers.map((server, index) => (
           <StatusCard
@@ -213,7 +231,7 @@ const ServerSection = () => {
             title={server.name}
             subtitle={server.ip}
             icon={Server}
-            status={server.status as any}
+            status={server.status}
             className="card-appear"
             style={{ '--delay': index + 1 } as React.CSSProperties}
             onClick={() => openNetdataInterface(server)}
@@ -225,59 +243,59 @@ const ServerSection = () => {
                   <span className="text-xs">CPU</span>
                 </div>
                 <div className="text-sm font-medium">
-                  <AnimatedNumber 
-                    value={server.cpuUsage} 
-                    formatter={(val) => `${val}%`} 
+                  <AnimatedNumber
+                    value={server.cpuUsage}
+                    formatter={(val) => `${val}%`}
                   />
                 </div>
                 <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full rounded-full ${
-                      server.cpuUsage > 80 ? 'bg-destructive' : 
+                      server.cpuUsage > 80 ? 'bg-destructive' :
                       server.cpuUsage > 60 ? 'bg-warning' : 'bg-success'
                     }`}
                     style={{ width: `${server.cpuUsage}%` }}
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Database className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-xs">RAM</span>
                 </div>
                 <div className="text-sm font-medium">
-                  <AnimatedNumber 
-                    value={server.memoryUsage} 
-                    formatter={(val) => `${val}%`} 
+                  <AnimatedNumber
+                    value={server.memoryUsage}
+                    formatter={(val) => `${val}%`}
                   />
                 </div>
                 <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full rounded-full ${
-                      server.memoryUsage > 80 ? 'bg-destructive' : 
+                      server.memoryUsage > 80 ? 'bg-destructive' :
                       server.memoryUsage > 60 ? 'bg-warning' : 'bg-success'
                     }`}
                     style={{ width: `${server.memoryUsage}%` }}
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <HardDrive className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-xs">Disk</span>
                 </div>
                 <div className="text-sm font-medium">
-                  <AnimatedNumber 
-                    value={server.diskUsage} 
-                    formatter={(val) => `${val}%`} 
+                  <AnimatedNumber
+                    value={server.diskUsage}
+                    formatter={(val) => `${val}%`}
                   />
                 </div>
                 <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full rounded-full ${
-                      server.diskUsage > 80 ? 'bg-destructive' : 
+                      server.diskUsage > 80 ? 'bg-destructive' :
                       server.diskUsage > 60 ? 'bg-warning' : 'bg-success'
                     }`}
                     style={{ width: `${server.diskUsage}%` }}
@@ -285,7 +303,7 @@ const ServerSection = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="text-xs text-muted-foreground mt-3">
               Uptime: {server.uptime}
               {server.netdataUrl && <div className="text-xs text-primary mt-1 cursor-pointer hover:underline">View Netdata dashboard →</div>}

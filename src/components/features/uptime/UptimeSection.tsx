@@ -6,84 +6,50 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { config } from '@/config';
+import type { StatusType } from '@/types';
+
+interface Website {
+  id: number;
+  name: string;
+  url: string;
+  status: StatusType;
+  uptime: number;
+  responseTime: number;
+  lastCheck: string;
+  incidents: number;
+}
 
 const UptimeSection = () => {
-  const [websites, setWebsites] = useState([]);
+  const [websites, setWebsites] = useState<Website[]>([]);
   const navigate = useNavigate();
   const { settings } = useSettings();
 
   // Generate mock website data based on configured websites
   useEffect(() => {
-    if (settings.uptime.websites.length === 0) {
-      // Default mock data if no real data is available
-      setWebsites([
-        {
-          id: 1,
-          name: 'Main Website',
-          url: 'https://example.com',
-          status: 'healthy',
-          uptime: 99.98,
-          responseTime: 187,
-          lastCheck: '2m ago',
-          incidents: 0,
-        },
-        {
-          id: 2,
-          name: 'API Service',
-          url: 'https://api.example.com',
-          status: 'warning',
-          uptime: 98.45,
-          responseTime: 312,
-          lastCheck: '3m ago',
-          incidents: 2,
-        },
-        {
-          id: 3,
-          name: 'Customer Portal',
-          url: 'https://customers.example.com',
-          status: 'healthy',
-          uptime: 99.99,
-          responseTime: 145,
-          lastCheck: '1m ago',
-          incidents: 0,
-        },
-        {
-          id: 4,
-          name: 'Document Service',
-          url: 'https://docs.example.com',
-          status: 'error',
-          uptime: 95.32,
-          responseTime: 525,
-          lastCheck: '5m ago',
-          incidents: 5,
-        },
-      ]);
-    } else {
-      // Generate mock data based on configured websites
-      const mockWebsites = settings.uptime.websites.map((site, index) => {
-        const statuses = config.monitoring.mockData.statusDistribution;
-        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-        const uptimeRanges = config.monitoring.mockData.uptimeRanges;
-        const uptime = randomStatus === 'healthy' ? uptimeRanges.healthy.min + Math.random() * (uptimeRanges.healthy.max - uptimeRanges.healthy.min) : 
-                      randomStatus === 'warning' ? uptimeRanges.warning.min + Math.random() * (uptimeRanges.warning.max - uptimeRanges.warning.min) : 
-                      uptimeRanges.error.min + Math.random() * (uptimeRanges.error.max - uptimeRanges.error.min);
-        
-        return {
-          id: index + 1,
-          name: site.name,
-          url: site.url,
-          status: randomStatus,
-          uptime: uptime,
-          responseTime: Math.floor(Math.random() * 400) + 100,
-          lastCheck: `${Math.floor(Math.random() * 10) + 1}m ago`,
-          incidents: randomStatus === 'healthy' ? 0 : 
-                    randomStatus === 'warning' ? Math.floor(Math.random() * 3) + 1 : 
-                    Math.floor(Math.random() * 5) + 3,
-        };
-      });
-      
-      setWebsites(mockWebsites);
-    }
+    // Generate mock data based on configured websites
+    const mockWebsites = settings.uptime.websites.map((site, index) => {
+      const statuses = config.monitoring.mockData.statusDistribution;
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)] as StatusType;
+      const uptimeRanges = config.monitoring.mockData.uptimeRanges;
+      const uptime = randomStatus === 'healthy' ? uptimeRanges.healthy.min + Math.random() * (uptimeRanges.healthy.max - uptimeRanges.healthy.min) :
+                    randomStatus === 'warning' ? uptimeRanges.warning.min + Math.random() * (uptimeRanges.warning.max - uptimeRanges.warning.min) :
+                    uptimeRanges.error.min + Math.random() * (uptimeRanges.error.max - uptimeRanges.error.min);
+
+      return {
+        id: index + 1,
+        name: site.name,
+        url: site.url,
+        status: randomStatus,
+        uptime: uptime,
+        responseTime: Math.floor(Math.random() * 400) + 100,
+        lastCheck: `${Math.floor(Math.random() * 10) + 1}m ago`,
+        incidents: randomStatus === 'healthy' ? 0 :
+                  randomStatus === 'warning' ? Math.floor(Math.random() * 3) + 1 :
+                  Math.floor(Math.random() * 5) + 3,
+      };
+    });
+
+    setWebsites(mockWebsites);
   }, [settings.uptime.websites]);
 
   const navigateToSettings = () => {
@@ -102,7 +68,7 @@ const UptimeSection = () => {
           <p className="text-sm text-muted-foreground mt-1">Monitoring your web services</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             className="text-sm font-medium text-primary flex items-center gap-1"
@@ -121,7 +87,7 @@ const UptimeSection = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {websites.map((site, index) => (
           <StatusCard
@@ -129,7 +95,7 @@ const UptimeSection = () => {
             title={site.name}
             subtitle={site.url}
             icon={Monitor}
-            status={site.status as any}
+            status={site.status}
             className="card-appear"
             style={{ '--delay': index + 1 } as React.CSSProperties}
           >
@@ -137,18 +103,18 @@ const UptimeSection = () => {
               <div>
                 <div className="text-xs text-muted-foreground">Uptime</div>
                 <div className="font-medium">
-                  <AnimatedNumber 
-                    value={site.uptime} 
-                    formatter={(val) => val.toFixed(2) + '%'} 
+                  <AnimatedNumber
+                    value={site.uptime}
+                    formatter={(val) => val.toFixed(2) + '%'}
                   />
                 </div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Response</div>
                 <div className="font-medium">
-                  <AnimatedNumber 
-                    value={site.responseTime} 
-                    formatter={(val) => `${val}ms`} 
+                  <AnimatedNumber
+                    value={site.responseTime}
+                    formatter={(val) => `${val}ms`}
                   />
                 </div>
               </div>

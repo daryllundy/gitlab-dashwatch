@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { roleService, UserRole, Permission } from '../auth/roleService';
+import { roleService, Permission } from '../auth/roleService';
 import type { User } from '@supabase/supabase-js';
 import type { EnvAccount, AuthenticationSource } from '@/types';
+import { UserRole } from '@/types';
 
 describe('RoleService', () => {
   let mockUser: User;
@@ -36,7 +37,7 @@ describe('RoleService', () => {
   describe('getUserRoleInfo', () => {
     it('should return guest role for null user', () => {
       const roleInfo = roleService.getUserRoleInfo(null, null);
-      
+
       expect(roleInfo.role).toBe(UserRole.GUEST);
       expect(roleInfo.permissions).toEqual([Permission.VIEW_MONITORING]);
       expect(roleInfo.isEnvironmentAccount).toBe(false);
@@ -50,7 +51,7 @@ describe('RoleService', () => {
       };
 
       const roleInfo = roleService.getUserRoleInfo(mockUser, manualAuthSource);
-      
+
       expect(roleInfo.role).toBe(UserRole.USER);
       expect(roleInfo.permissions).toContain(Permission.MANAGE_SETTINGS);
       expect(roleInfo.isEnvironmentAccount).toBe(false);
@@ -59,7 +60,7 @@ describe('RoleService', () => {
 
     it('should return admin role for environment account with admin role', () => {
       const roleInfo = roleService.getUserRoleInfo(mockUser, mockAuthSource, mockEnvAccount);
-      
+
       expect(roleInfo.role).toBe(UserRole.ADMIN);
       expect(roleInfo.permissions).toContain(Permission.SYSTEM_ADMIN);
       expect(roleInfo.isEnvironmentAccount).toBe(true);
@@ -73,7 +74,7 @@ describe('RoleService', () => {
       };
 
       const roleInfo = roleService.getUserRoleInfo(mockUser, mockAuthSource, viewerAccount);
-      
+
       expect(roleInfo.role).toBe(UserRole.VIEWER);
       expect(roleInfo.permissions).toContain(Permission.VIEW_SETTINGS);
       expect(roleInfo.permissions).not.toContain(Permission.MANAGE_SETTINGS);
@@ -88,7 +89,7 @@ describe('RoleService', () => {
       };
 
       const roleInfo = roleService.getUserRoleInfo(mockUser, mockAuthSource, accountWithoutRole);
-      
+
       expect(roleInfo.role).toBe(UserRole.USER);
       expect(roleInfo.isEnvironmentAccount).toBe(true);
     });
@@ -102,7 +103,7 @@ describe('RoleService', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const roleInfo = roleService.getUserRoleInfo(mockUser, mockAuthSource, unknownRoleAccount);
-      
+
       expect(roleInfo.role).toBe(UserRole.USER);
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unknown role "unknown-role", defaulting to USER role')
