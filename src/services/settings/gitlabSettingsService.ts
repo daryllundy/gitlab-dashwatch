@@ -172,22 +172,30 @@ class GitlabSettingsService {
 
       const updatedInstance = { ...existingInstance, ...updates };
 
-      // Ensure required fields are present for validation
-      const instanceToValidate: GitlabInstance = {
+      // Build the instance object with only defined values
+      const instanceToValidate: any = {
         id: updatedInstance.id || existingInstance.id,
         name: updatedInstance.name || existingInstance.name,
         url: updatedInstance.url || existingInstance.url,
         token: updatedInstance.token || existingInstance.token,
-        description: updatedInstance.description || existingInstance.description,
+        description: updatedInstance.description ?? existingInstance.description ?? '',
         isActive: updatedInstance.isActive ?? existingInstance.isActive,
-        lastChecked: updatedInstance.lastChecked,
         apiVersion: updatedInstance.apiVersion || existingInstance.apiVersion,
         connectionStatus: updatedInstance.connectionStatus || existingInstance.connectionStatus,
-        errorMessage: updatedInstance.errorMessage,
-        rateLimitInfo: updatedInstance.rateLimitInfo,
         selectedProjects: updatedInstance.selectedProjects || existingInstance.selectedProjects,
         fetchOptions: updatedInstance.fetchOptions || existingInstance.fetchOptions,
       };
+
+      // Add optional fields only if they have values
+      if (updatedInstance.lastChecked !== undefined) {
+        instanceToValidate.lastChecked = updatedInstance.lastChecked;
+      }
+      if (updatedInstance.errorMessage !== undefined) {
+        instanceToValidate.errorMessage = updatedInstance.errorMessage;
+      }
+      if (updatedInstance.rateLimitInfo !== undefined) {
+        instanceToValidate.rateLimitInfo = updatedInstance.rateLimitInfo;
+      }
 
       const validation = validateGitlabInstance(instanceToValidate);
       if (!validation.isValid) {
@@ -228,8 +236,9 @@ class GitlabSettingsService {
       }
 
       const removedInstance = this.settings.instances.splice(instanceIndex, 1)[0];
-
-      logger.info(`GitLab instance removed: ${removedInstance.name} (${instanceId})`, 'GitlabSettingsService');
+      if (removedInstance) {
+        logger.info(`GitLab instance removed: ${removedInstance.name} (${instanceId})`, 'GitlabSettingsService');
+      }
 
       return true;
     } catch (error) {
