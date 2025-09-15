@@ -1,161 +1,369 @@
-# GitLab DashWatch 📊
+# GitLab DashWatch
 
-[![React](https://img.shields.io/badge/react-18-blue.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Docker Hub](https://img.shields.io/badge/docker-hub-blue.svg)](https://hub.docker.com/r/dbdaryl/gitlab-dashwatch)
-[![GitLab Mirror](https://img.shields.io/badge/gitlab-mirror-orange.svg)](https://gitlab.com/daryllundy/gitlab-dashwatch)
+A comprehensive GitLab monitoring and management dashboard built with React, TypeScript, and modern web technologies. Monitor multiple GitLab instances, track project activity, manage webhooks, and optimize performance with real-time analytics and insights.
 
-A self-hosted monitoring dashboard for GitLab instances, servers, DNS domains, and website uptime. Built with React, TypeScript, and Tailwind CSS. No authentication required - settings are stored locally in your browser.
+## 🚀 Features
 
-## Project History
+### Core Functionality
+- **Multi-Instance Support**: Monitor multiple GitLab instances simultaneously
+- **Real-time Monitoring**: Live updates via webhooks and polling
+- **Project Activity Tracking**: Comprehensive activity monitoring and analytics
+- **Performance Optimization**: Advanced performance monitoring and recommendations
+- **Secure Token Management**: Encrypted storage with Web Crypto API
+- **Advanced Search & Filtering**: Full-text search with faceted filtering
+- **Caching & Rate Limiting**: Intelligent caching and API rate limit management
+- **Error Handling & Recovery**: Circuit breaker pattern with automatic retry logic
 
-This project was originally created using [Lovable.dev](https://lovable.dev) - an AI-powered development platform that accelerates web application development. The initial prototype was built through Lovable's intuitive prompting interface, which generated a fully functional React application with modern best practices.
+### Dashboard & Analytics
+- **Interactive Dashboard**: Real-time metrics and health monitoring
+- **Activity Insights**: Trend analysis and contributor analytics
+- **Performance Benchmarking**: Baseline comparison and optimization tracking
+- **Alert System**: Configurable alerts with severity levels
+- **Export Functionality**: JSON/CSV export for all data types
+- **Responsive Design**: Mobile-friendly interface with dark/light themes
 
-The project has since been **completely refactored and enhanced** to run anywhere:
-- ✅ Migrated from Lovable.dev's hosted environment to self-hosted deployment
-- ✅ Added Docker containerization for universal deployment
-- ✅ Implemented comprehensive TypeScript typing and error handling
-- ✅ Organized codebase according to industry best practices
-- ✅ Added extensive testing suite and CI/CD capabilities
-- ✅ Enhanced with production-ready features and documentation
+### Developer Experience
+- **TypeScript**: Full type safety with comprehensive interfaces
+- **Modern UI**: Built with React, Tailwind CSS, and shadcn/ui
+- **Testing**: Comprehensive test suite with Vitest and React Testing Library
+- **Documentation**: Extensive inline documentation and guides
+- **Performance**: Optimized with lazy loading and code splitting
 
-While Lovable.dev provided an excellent foundation for rapid prototyping, this version represents a production-ready application suitable for enterprise deployment.
+## 📋 Table of Contents
 
-## Prerequisites
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-- Node.js 18+ and npm (for local development)
-- Docker and Docker Compose (for containerized deployment)
+## 🚀 Quick Start
 
-## Environment Configuration
+### Prerequisites
 
-No environment variables are required for basic operation. The application runs without authentication and stores all settings locally in your browser.
+- Node.js 18+ and npm/yarn/pnpm
+- GitLab instance(s) with API access
+- Personal Access Token with appropriate permissions
 
-## Local Development
+### Installation
 
-### Option 1: Direct Node.js
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/gitlab-dashwatch.git
+   cd gitlab-dashwatch
+   ```
 
-```sh
-# Clone the repository
-git clone https://github.com/daryllundy/gitlab-dashwatch.git
-cd gitlab-dashwatch
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
 
-# Install dependencies
-npm install
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-# Start development server
-npm run dev
+4. **Start Development Server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
+
+5. **Build for Production**
+   ```bash
+   npm run build
+   npm run preview
+   ```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```env
+# Application Configuration
+VITE_APP_TITLE="GitLab DashWatch"
+VITE_APP_VERSION="1.0.0"
+VITE_APP_ENV="development"
+
+# GitLab Configuration
+VITE_GITLAB_DEFAULT_URL="https://gitlab.com"
+VITE_GITLAB_API_VERSION="v4"
+VITE_GITLAB_REQUEST_TIMEOUT=30000
+
+# Security Configuration
+VITE_ENCRYPTION_KEY="your-32-character-encryption-key"
+VITE_TOKEN_ROTATION_DAYS=90
+
+# Performance Configuration
+VITE_CACHE_TTL_MINUTES=60
+VITE_RATE_LIMIT_REQUESTS_PER_HOUR=1000
+VITE_MAX_CONCURRENT_REQUESTS=10
+
+# Monitoring Configuration
+VITE_ENABLE_REAL_TIME_UPDATES=true
+VITE_POLLING_INTERVAL_SECONDS=300
+VITE_ENABLE_WEBHOOKS=true
+VITE_WEBHOOK_SECRET="your-webhook-secret"
+
+# UI Configuration
+VITE_DEFAULT_THEME="system"
+VITE_ENABLE_ANIMATIONS=true
+VITE_ITEMS_PER_PAGE=25
 ```
 
-The application will be available at `http://localhost:8080`
+### GitLab Permissions
 
-### Option 2: Docker Development Environment
+Your Personal Access Token needs the following scopes:
+- `api` - Full API access
+- `read_user` - Read user information
+- `read_repository` - Read repository information
+- `read_registry` - Read container registry information (optional)
 
-```sh
-# Run development environment with hot reload
-npm run docker:dev
+## 📖 Usage
 
-# Or using docker-compose directly
-docker-compose --profile dev up
+### Adding GitLab Instances
+
+1. Navigate to Settings → GitLab Instances
+2. Click "Add Instance"
+3. Enter your GitLab instance details:
+   - Instance Name
+   - GitLab URL
+   - Personal Access Token
+4. Test the connection
+5. Save the configuration
+
+### Monitoring Projects
+
+1. Go to the Projects page
+2. Select your GitLab instance
+3. Browse and filter projects
+4. View detailed project information
+5. Monitor activity and performance
+
+### Setting Up Webhooks
+
+1. In your GitLab instance, go to Project Settings → Webhooks
+2. Add webhook URL: `https://your-domain.com/api/webhooks/gitlab`
+3. Select events to monitor
+4. Set the webhook secret
+5. Test the webhook
+
+### Performance Monitoring
+
+1. Access the Performance Dashboard
+2. View real-time metrics
+3. Set up alerts and thresholds
+4. Run performance benchmarks
+5. Review optimization recommendations
+
+## 🔧 API Documentation
+
+### Core Services
+
+#### GitlabApiService
+Main service for GitLab API interactions.
+
+```typescript
+import { gitlabApiService } from '@/services/monitoring/gitlabApiService';
+
+// Get projects
+const projects = await gitlabApiService.getProjects(instanceId, options);
+
+// Get project details
+const project = await gitlabApiService.getProject(instanceId, projectId);
+
+// Search projects
+const results = await gitlabApiService.searchProjects(instanceId, query, filters);
 ```
 
-The application will be available at `http://localhost:8080`
+#### GitlabActivityService
+Activity monitoring and analytics.
 
-## Production Deployment
+```typescript
+import { gitlabActivityService } from '@/services/monitoring/gitlabActivityService';
 
-### Option 1: Docker Container
+// Record activity
+await gitlabActivityService.recordActivity(projectId, instanceId, activityData);
 
-```sh
-# Build and run production container
-npm run docker:build
-npm run docker:run
+// Get activities
+const activities = gitlabActivityService.getActivities(projectId, instanceId, filters);
 
-# Or using docker-compose
-npm run docker:prod
+// Get activity summary
+const summary = gitlabActivityService.getActivitySummary(projectId, instanceId, period);
 ```
 
-The application will be available at `http://localhost:3000`
+#### GitlabPerformanceService
+Performance monitoring and optimization.
 
-### Option 2: Manual Docker Commands
+```typescript
+import { gitlabPerformanceService } from '@/services/monitoring/gitlabPerformanceService';
 
-```sh
-# Build the image
-docker build -t gitlab-dashwatch .
+// Record metrics
+await gitlabPerformanceService.recordMetrics(instanceId, metrics);
 
-# Run the container
-docker run -p 3000:80 gitlab-dashwatch
+// Get current metrics
+const metrics = gitlabPerformanceService.getCurrentMetrics(instanceId);
+
+// Run benchmark
+const benchmark = await gitlabPerformanceService.runBenchmark(instanceId, 'baseline');
 ```
 
-### Option 3: Use Pre-built Docker Image
+### Webhook Integration
 
-Pull and run the pre-built image from Docker Hub:
+#### Webhook Endpoints
 
-```sh
-# Pull the latest image
-docker pull dbdaryl/gitlab-dashwatch:latest
+```
+POST /api/webhooks/gitlab/:instanceId
+Content-Type: application/json
+X-Gitlab-Event: Push Hook
+X-Gitlab-Token: your-webhook-secret
 
-# Run the container
-docker run -p 3000:80 dbdaryl/gitlab-dashwatch:latest
+{
+  "object_kind": "push",
+  "project": { "id": 123, "name": "my-project" },
+  "commits": [...],
+  "user_name": "john.doe"
+}
 ```
 
-### Option 4: Deploy to Hosting Provider
+#### Webhook Events Supported
 
-The Docker container can be deployed to any hosting provider that supports Docker:
+- Push events
+- Merge request events
+- Issue events
+- Pipeline events
+- Release events
+- Wiki page events
+- Project events
+- Member events
 
-- **DigitalOcean App Platform**: Push to GitHub/GitLab and deploy directly
-- **Railway**: Connect repository and deploy with automatic builds
-- **Fly.io**: Use `flyctl` to deploy the Docker container
-- **Heroku**: Use Container Registry for Docker deployments
-- **AWS ECS/Fargate**: Deploy using AWS container services
-- **Google Cloud Run**: Deploy serverless containers
+## 🐛 Troubleshooting
 
-**Docker Hub**: `dbdaryl/gitlab-dashwatch:latest`
+### Common Issues
 
-**Note**: No environment variables or external dependencies are required for deployment.
+#### Connection Issues
 
-## Docker Management Commands
-
-```sh
-# Stop all containers
-npm run docker:stop
-
-# Clean up containers, volumes, and images
-npm run docker:clean
-
-# View logs
-docker-compose logs -f
+**Problem**: Unable to connect to GitLab instance
+```
+Error: Failed to fetch from https://gitlab.example.com/api/v4/projects
 ```
 
-## Technologies Used
+**Solutions**:
+1. Verify GitLab URL is correct
+2. Check network connectivity
+3. Ensure Personal Access Token is valid
+4. Verify token permissions
+5. Check firewall/proxy settings
 
-- **Frontend**: React 18, TypeScript, Vite
-- **UI Framework**: shadcn/ui (Radix UI components)
-- **Styling**: Tailwind CSS
-- **State Management**: React Context + TanStack Query
-- **Storage**: Browser localStorage for settings persistence
-- **Routing**: React Router v6
-- **Deployment**: Docker + Nginx
+#### Authentication Errors
 
-## Features
+**Problem**: 401 Unauthorized
+```
+Error: Authentication failed
+```
 
-- 🔍 Monitor multiple GitLab instances with API integration
-- 📊 Track website uptime and response times
-- 🌐 DNS domain monitoring with record type checking
-- 🖥️ Server monitoring with Netdata integration
-- 💾 Local settings persistence in browser storage
-- 🎨 Responsive design with dark/light theme support
-- 🐳 Docker containerization for easy deployment
-- ✅ Comprehensive testing suite
-- 📈 Production-ready with error handling and monitoring
-- 🚀 No authentication required - instant access
+**Solutions**:
+1. Regenerate Personal Access Token
+2. Ensure token has required scopes
+3. Check token expiration
+4. Verify token format
 
-## Testing
+#### Rate Limiting
 
-This project includes a comprehensive test suite:
+**Problem**: 429 Too Many Requests
+```
+Error: API rate limit exceeded
+```
 
-```sh
+**Solutions**:
+1. Increase rate limit buffer in configuration
+2. Implement request queuing
+3. Use caching to reduce API calls
+4. Consider upgrading GitLab plan
+
+#### Webhook Issues
+
+**Problem**: Webhooks not triggering
+```
+Webhook delivery failed
+```
+
+**Solutions**:
+1. Verify webhook URL is accessible
+2. Check webhook secret matches
+3. Ensure SSL certificate is valid
+4. Review GitLab webhook logs
+5. Test webhook manually
+
+### Performance Issues
+
+#### High Memory Usage
+- Reduce cache size
+- Implement garbage collection
+- Monitor memory leaks
+- Scale application resources
+
+#### Slow Response Times
+- Enable caching
+- Optimize database queries
+- Implement lazy loading
+- Use CDN for static assets
+
+#### High CPU Usage
+- Profile application performance
+- Optimize algorithms
+- Implement load balancing
+- Scale horizontally
+
+### Debug Mode
+
+Enable debug logging:
+
+```env
+VITE_DEBUG_MODE=true
+VITE_LOG_LEVEL=debug
+```
+
+View logs in browser console or check the logs directory.
+
+## 🤝 Contributing
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Update documentation
+7. Submit a pull request
+
+### Code Style
+
+- Use TypeScript for all new code
+- Follow ESLint configuration
+- Use Prettier for code formatting
+- Write comprehensive tests
+- Add JSDoc comments for public APIs
+
+### Testing
+
+```bash
 # Run all tests
-npm test
+npm run test
 
 # Run tests in watch mode
 npm run test:watch
@@ -163,310 +371,76 @@ npm run test:watch
 # Run tests with coverage
 npm run test:coverage
 
-# Type checking and linting
-npm run check
-
-# Validate environment configuration
-npm run validate:env
+# Run integration tests
+npm run test:integration
 ```
 
-### Environment Configuration Validation
+### Building
 
-The project includes automated validation to ensure the `.env.example` file stays in sync with code requirements:
-
-```sh
-# Validate .env.example completeness and documentation
-npm run validate:env
-
-# Run validation as part of the full check suite
-npm run check
-```
-
-The validation checks:
-- ✅ All required environment variables are documented
-- ✅ Account configuration examples are provided
-- ✅ Security best practices are documented
-- ✅ Use case examples are included
-- ✅ Variable naming consistency is maintained
-
-## Settings Storage
-
-GitLab DashWatch stores all settings locally in your browser's localStorage. This means:
-
-- ✅ **No account required**: Start monitoring immediately
-- ✅ **Privacy focused**: Your settings never leave your browser
-- ✅ **Fast access**: No network calls for settings
-- ⚠️ **Browser specific**: Settings are tied to your browser and device
-- ⚠️ **Backup recommended**: Export settings if you want to transfer them
-
-**Note**: Settings will be lost if you clear your browser data. Consider exporting your configuration for backup.
-
-## Docker Configuration
-
-### Simple Docker Deployment
-
-No environment variables are required for deployment:
-
-```sh
-# Build and run with Docker Compose
-docker-compose up --build
-```
-
-### Development vs Production
-
-- **Development**: Uses `Dockerfile.dev` with hot reload and volume mounting
-- **Production**: Uses multi-stage build with optimized Nginx serving
-
-## Quick Start with Docker
-
-The fastest way to get started:
-
-```sh
-# 1. Clone the repository
-git clone https://github.com/daryllundy/gitlab-dashwatch.git
-cd gitlab-dashwatch
-
-# 2. Build and run with Docker Compose
-docker-compose up --build
-
-# 3. Visit http://localhost:3000
-
-# 4. Start configuring your monitoring targets in Settings
-```
-
-## Screenshots
-
-### Dashboard Overview
-![Dashboard Overview](docs/screenshots/dashboard-overview.png)
-*Main dashboard showing monitoring status for GitLab instances, websites, DNS, and servers*
-
-### Settings Configuration
-![GitLab Settings](docs/screenshots/settings-gitlab.png)
-*Configure multiple GitLab instances with API tokens*
-
-![Website Monitoring](docs/screenshots/settings-uptime.png)
-*Add websites for uptime monitoring*
-
-![DNS Monitoring](docs/screenshots/settings-dns.png)
-*Configure DNS domain monitoring with record types*
-
-![Server Monitoring](docs/screenshots/settings-servers.png)
-*Set up server monitoring with Netdata integration*
-
-### Theme Support
-![Dark Mode](docs/screenshots/dark-mode.png)
-*Dark theme support for better visibility*
-
-![Light Mode](docs/screenshots/light-mode.png)
-*Light theme with clean, professional design*
-
-## Video Demos
-
-Interactive terminal demonstrations showing GitLab DashWatch setup and deployment workflows.
-
-### Quick Start Demo
-[![asciicast](https://asciinema.org/a/XiEIrtP1XjFUnOD8hiXE21xSN.svg)](https://asciinema.org/a/XiEIrtP1XjFUnOD8hiXE21xSN)
-*Complete setup from clone to running application with Docker (~38 seconds)*
-
-### Docker Development Workflow
-[![asciicast](https://asciinema.org/a/gVas8of05Pgi8iM0mGGanLnAE.svg)](https://asciinema.org/a/gVas8of05Pgi8iM0mGGanLnAE)
-*Development environment setup with hot reload and testing (~44 seconds)*
-
-### Production Deployment Demo
-[![asciicast](https://asciinema.org/a/xK6f3fdaWlaQEdt3HTnKwhmTh.svg)](https://asciinema.org/a/xK6f3fdaWlaQEdt3HTnKwhmTh)
-*Building and deploying to production (~60 seconds)*
-
-### Viewing Demos
-
-#### Option 1: Click the embedded players above
-Each demo includes an interactive asciinema player that you can click to play directly in this README.
-
-#### Option 2: Play locally
 ```bash
-# Install asciinema player
-npm install -g asciinema
+# Development build
+npm run dev
 
-# List available demos
-npm run demos:play
+# Production build
+npm run build
 
-# Play any demo locally
-asciinema play docs/demos/quick-start-demo.cast
-asciinema play docs/demos/docker-dev-workflow.cast
-asciinema play docs/demos/production-deploy-demo.cast
+# Preview production build
+npm run preview
+
+# Analyze bundle size
+npm run analyze
 ```
 
-#### Option 3: Open in asciinema.org
-- [Quick Start Demo](https://asciinema.org/a/XiEIrtP1XjFUnOD8hiXE21xSN)
-- [Docker Development Workflow](https://asciinema.org/a/gVas8of05Pgi8iM0mGGanLnAE)
-- [Production Deployment Demo](https://asciinema.org/a/xK6f3fdaWlaQEdt3HTnKwhmTh)
+## 📚 Architecture
 
-📁 **Local Files**: All demo recordings are available in [`docs/demos/`](docs/demos/) directory.  
-📚 **Documentation**: See [`docs/demos/README.md`](docs/demos/README.md) for detailed information.
-
-## Architecture & Code Organization
-
-### Component Organization Strategy
-
-**Common Components** (`src/components/common/`)
-- Reusable components used across multiple features
-- Examples: `ErrorBoundary`, `LoadingSpinner`, `PageLayout`
-- Should have minimal dependencies and be highly reusable
-
-**UI Components** (`src/components/ui/`)
-- shadcn/ui components and base UI primitives
-- Maintained as provided by shadcn/ui
-- Should not contain business logic
-
-**Feature Components** (`src/components/features/`)
-- Components specific to particular features
-- Organized by feature domain (dashboard, gitlab, uptime, dns, server)
-- Can import from common and ui components
-
-**Layout Components** (`src/components/layout/`)
-- Components that define application layout
-- Examples: `Navbar`, `Sidebar`, `Footer`
-- Used across multiple pages
-
-### State Management Patterns
-
-- **Global State**: React Context (`SettingsContext`)
-- **Server State**: TanStack Query for API calls
-- **Local State**: `useState` for component-specific data
-- **Settings Storage**: Browser localStorage with service layer abstraction
-
-### Error Handling Strategy
-
-- Global `ErrorBoundary` wraps the entire application
-- Feature-specific error boundaries for major sections
-- Component-level error states for graceful degradation
-- Consistent error logging and user feedback through `src/lib/error.ts`
-
-### Testing Structure
-
-- Tests co-located with components in `__tests__` folders
-- Test utilities centralized in `src/test/`
-- MSW handlers for API mocking
-- Comprehensive coverage for critical paths
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-1. **Fork and clone the repository**
-2. **Install dependencies**: `npm install`
-3. **Set up environment**: No configuration required
-4. **Start development server**: `npm run dev`
-5. **Run tests**: `npm test`
-6. **Submit a pull request**
-
-### Project Structure
+### Service Layer Architecture
 
 ```
-src/
-├── components/           # React components
-│   ├── common/          # Reusable components (ErrorBoundary, LoadingSpinner, PageLayout)
-│   ├── ui/              # shadcn/ui components (button, card, dialog, etc.)
-│   ├── features/        # Feature-specific components
-│   │   ├── dashboard/   # Dashboard-related components
-│   │   ├── gitlab/      # GitLab monitoring components
-│   │   ├── uptime/      # Uptime monitoring components
-│   │   ├── dns/         # DNS monitoring components
-│   │   └── server/      # Server monitoring components
-│   └── layout/          # Layout components (Navbar, etc.)
-├── config/              # Configuration and environment handling
-├── constants/           # Application constants and defaults
-├── contexts/            # React contexts (SettingsContext)
-├── hooks/               # Custom React hooks
-├── lib/                 # Utility libraries (utils, api, logger, etc.)
-├── pages/               # Page components (Index, Settings, NotFound)
-├── services/            # API services and external integrations
-│   ├── auth/           # Authentication services
-│   ├── monitoring/     # Monitoring-related services
-│   ├── settings/       # Settings management services
-│   └── storage/        # Data storage and export services
-├── test/                # Test utilities and mocks
-├── types/               # TypeScript type definitions
-└── main.tsx             # Application entry point
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Components    │    │    Services     │    │   External APIs │
+│                 │    │                 │    │                 │
+│ • Dashboard     │◄──►│ • GitlabApi     │◄──►│ • GitLab API    │
+│ • Project Cards │    │ • Activity      │    │ • Webhooks      │
+│ • Settings      │    │ • Performance   │    │ • Cache         │
+│ • Monitoring    │    │ • Caching       │    │ • Storage       │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-#### File Naming Conventions
+### Data Flow
 
-- **Components**: PascalCase (`StatusCard.tsx`, `GitlabProjectList.tsx`)
-- **Hooks**: camelCase with `use` prefix (`useSettings.ts`, `useMobile.tsx`)
-- **Services**: camelCase (`settingsService.ts`, `gitlabApiService.ts`)
-- **Types**: PascalCase (`GitlabProject`, `StatusType`, `MonitoringConfig`)
-- **Constants**: UPPER_SNAKE_CASE (`DEFAULT_SETTINGS`, `API_ENDPOINTS`)
-- **Pages**: PascalCase (`Index.tsx`, `Settings.tsx`)
+1. **User Interaction** → Component
+2. **Component** → Service Layer
+3. **Service** → API Client
+4. **API Client** → GitLab API
+5. **Response** → Service Processing
+6. **Processed Data** → Component
+7. **Component** → UI Update
 
-#### Import Patterns
+### State Management
 
-Use absolute imports with `@/` alias for clean, maintainable code:
+- **Local State**: React useState/useReducer for component state
+- **Global State**: React Context for application-wide state
+- **Persistent State**: LocalStorage for user preferences
+- **Server State**: React Query for API data caching
 
-```typescript
-// React and third-party libraries
-import React from 'react';
-import { Button } from '@/components/ui/button';
-
-// Internal components (common → ui → features → layout)
-import { LoadingSpinner } from '@/components/common';
-import { GitlabProjectCard } from '@/components/features/gitlab';
-import { Navbar } from '@/components/layout';
-
-// Hooks and contexts
-import { useSettings } from '@/contexts/SettingsContext';
-
-// Services and utilities
-import { gitlabApiService } from '@/services';
-import { formatDate } from '@/lib/date';
-
-// Types and constants
-import type { GitlabProject } from '@/types';
-import { ROUTES } from '@/constants';
-```
-
-#### Developer Guidelines
-
-**Adding New Components:**
-- **Reusable components** → `src/components/common/`
-- **UI primitives** → `src/components/ui/` (shadcn/ui components)
-- **Feature-specific** → `src/components/features/[feature]/`
-- **Layout components** → `src/components/layout/`
-
-**Adding New Business Logic:**
-- **API services** → `src/services/[domain]/`
-- **Custom hooks** → `src/hooks/`
-- **Utility functions** → `src/lib/`
-
-**Adding New Types:**
-- **Centralized types** → `src/types/index.ts`
-- **Group by feature domain** (GitLab, monitoring, etc.)
-
-**Adding Configuration:**
-- **Environment handling** → `src/config/env.ts`
-- **App constants** → `src/constants/index.ts`
-- **Default configs** → `src/config/defaults.ts`
-
-**Writing Tests:**
-- **Co-locate with components** → `ComponentName/__tests__/ComponentName.test.tsx`
-- **Test utilities** → `src/test/`
-- **Integration tests** → `src/test/integration/`
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🙏 Acknowledgments
 
-- 🐛 **Bug Reports**: [Create an issue](https://github.com/daryllundy/gitlab-dashwatch/issues)
-- 💡 **Feature Requests**: [Start a discussion](https://github.com/daryllundy/gitlab-dashwatch/discussions)
-- 📚 **Documentation**: Check the [docs](./docs) directory
-- 💬 **Community**: Join our discussions on GitHub
+- [GitLab](https://gitlab.com) for their excellent API
+- [React](https://reactjs.org) for the UI framework
+- [Tailwind CSS](https://tailwindcss.com) for styling
+- [shadcn/ui](https://ui.shadcn.com) for UI components
+- [Vite](https://vitejs.dev) for the build tool
 
-## Acknowledgments
+## 📞 Support
 
-- Built with [Lovable.dev](https://lovable.dev) for rapid prototyping
-- UI components from [shadcn/ui](https://ui.shadcn.com)
-- Icons by [Lucide](https://lucide.dev)
-- Monitoring inspiration from GitLab's own monitoring tools
+- **Issues**: [GitHub Issues](https://github.com/yourusername/gitlab-dashwatch/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/gitlab-dashwatch/discussions)
+- **Documentation**: [Wiki](https://github.com/yourusername/gitlab-dashwatch/wiki)
+
+---
+
+Built with ❤️ using modern web technologies
