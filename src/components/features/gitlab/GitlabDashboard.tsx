@@ -362,34 +362,34 @@ const GitlabDashboard: React.FC = () => {
     );
   }
 
-  if (!filteredData) return null;
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">GitLab Dashboard</h1>
-          <p className="text-muted-foreground">Monitor your GitLab instances and projects</p>
+  // Render error state
+  if (!filteredData) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">GitLab Dashboard</h1>
+            <p className="text-muted-foreground">Monitor your GitLab instances and projects</p>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Select value={selectedTimeRange} onValueChange={(value: any) => setSelectedTimeRange(value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1h">Last Hour</SelectItem>
-              <SelectItem value="24h">Last 24h</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedInstance} onValueChange={setSelectedInstance}>
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Unable to Load Dashboard</h3>
+              <p className="text-muted-foreground mb-4">
+                There was an error loading the dashboard data. Please check your configuration and try again.
+              </p>
+              <Button onClick={handleRefresh} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
             <SelectContent>
               <SelectItem value="all">All Instances</SelectItem>
               {filteredData.instances.map(instance => (
@@ -414,7 +414,7 @@ const GitlabDashboard: React.FC = () => {
             <Settings className="h-4 w-4 mr-2" />
             Configure
           </Button>
-        </div>
+        </Card>
       </div>
 
       {/* Health Status Alert */}
