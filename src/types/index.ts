@@ -485,11 +485,7 @@ export type ExportDataType =
 // =============================================================================
 
 export interface Settings {
-  gitlab: {
-    instances: GitlabInstance[];
-    refreshInterval: number;
-    maxProjects: number;
-  };
+  gitlab: GitlabSettings;
   uptime: {
     websites: UptimeTarget[];
     defaultTimeout: number;
