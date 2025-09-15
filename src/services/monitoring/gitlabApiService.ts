@@ -3,11 +3,19 @@
 
 import { apiClient } from '@/lib/api';
 import { logger } from '@/lib/logger';
+import {
+  validateGitlabInstance,
+  sanitizeGitlabInstance,
+  sanitizeGitlabProject,
+  createDefaultFetchOptions
+} from '@/lib/validation';
 import type {
   GitlabInstance,
   GitlabProject,
+  GitlabSettings,
   ApiResponse,
-  ApiRequestOptions
+  ApiRequestOptions,
+  FetchOptions
 } from '@/types';
 
 // GitLab API specific types
@@ -264,15 +272,31 @@ class GitlabApiService {
   private clients: Map<string, GitlabApiClient> = new Map();
 
   /**
+   * Validate and sanitize a GitLab instance before use
+   */
+  private validateAndSanitizeInstance(instance: GitlabInstance): GitlabInstance {
+    const validation = validateGitlabInstance(instance);
+    if (!validation.isValid) {
+      const errorMessage = `Invalid GitLab instance configuration: ${validation.errors.map(e => e.message).join(', ')}`;
+      logger.error(errorMessage, 'GitlabApiService');
+      throw new GitlabApiError(errorMessage, GitlabErrorType.VALIDATION_ERROR);
+    }
+
+    return sanitizeGitlabInstance(instance);
+  }
+
+  /**
    * Get or create a GitLab API client for an instance
    */
   private getClient(instance: GitlabInstance): GitlabApiClient {
-    const key = instance.id;
+    // Validate and sanitize the instance
+    const sanitizedInstance = this.validateAndSanitizeInstance(instance);
+    const key = sanitizedInstance.id;
 
     if (!this.clients.has(key)) {
       const config: GitlabApiConfig = {
-        baseUrl: instance.url,
-        token: instance.token,
+        baseUrl: sanitizedInstance.url,
+        token: sanitizedInstance.token,
         version: 'v4',
         timeout: 30000, // 30 seconds
         retryAttempts: 3,
@@ -290,19 +314,257 @@ class GitlabApiService {
    */
   removeClient(instanceId: string): void {
     this.clients.delete(instanceId);
+    logger.info(`Removed GitLab API client for instance: ${instanceId}`, 'GitlabApiService');
   }
 
   /**
    * Update client configuration
    */
   updateClientConfig(instance: GitlabInstance): void {
-    const client = this.clients.get(instance.id);
+    const sanitizedInstance = this.validateAndSanitizeInstance(instance);
+    const client = this.clients.get(sanitizedInstance.id);
     if (client) {
       client.updateConfig({
-        baseUrl: instance.url,
-        token: instance.token,
+        baseUrl: sanitizedInstance.url,
+        token: sanitizedInstance.token,
       });
+      logger.info(`Updated GitLab API client configuration for instance: ${sanitizedInstance.id}`, 'GitlabApiService');
     }
+  }
+
+  /**
+   * Test connection to a GitLab instance with detailed validation
+   */
+  async testInstanceConnection(instance: GitlabInstance): Promise<{
+    success: boolean;
+    error?: string;
+    details?: {
+      version?: string;
+      rateLimitInfo?: RateLimitInfo;
+      connectionTime?: number;
+    };
+  }> {
+    const startTime = Date.now();
+
+    try {
+      const sanitizedInstance = this.validateAndSanitizeInstance(instance);
+      const client = this.getClient(sanitizedInstance);
+
+      logger.info(`Testing connection to GitLab instance: ${sanitizedInstance.url}`, 'GitlabApiService');
+
+      const result = await client.testConnection();
+      const connectionTime = Date.now() - startTime;
+
+      if (result.success) {
+        const rateLimitInfo = client.getRateLimitInfo();
+        logger.info(`Successfully connected to GitLab instance: ${sanitizedInstance.url} (${result.version})`, 'GitlabApiService');
+
+        return {
+          success: true,
+          details: {
+            ...(result.version && { version: result.version }),
+            ...(rateLimitInfo && { rateLimitInfo }),
+            connectionTime,
+          },
+        };
+      } else {
+        logger.warn(`Failed to connect to GitLab instance: ${sanitizedInstance.url} - ${result.error}`, 'GitlabApiService');
+        return {
+          success: false,
+          error: result.error || 'Connection test failed',
+        };
+      }
+    } catch (error) {
+      const connectionTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
+
+      logger.error(`Connection test failed for GitLab instance: ${instance.url} - ${errorMessage}`, 'GitlabApiService', error);
+
+      return {
+        success: false,
+        error: `Connection failed: ${errorMessage}`,
+        details: {
+          connectionTime,
+        },
+      };
+    }
+  }
+
+  /**
+   * Get user information from GitLab instance
+   */
+  async getCurrentUser(instance: GitlabInstance): Promise<{
+    id: number;
+    username: string;
+    name: string;
+    email?: string;
+    avatarUrl?: string;
+  } | null> {
+    const client = this.getClient(instance);
+
+    try {
+      const response = await client.get('/user');
+      const user = response.data as any;
+
+      return {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatar_url,
+      };
+    } catch (error) {
+      logger.error(`Failed to fetch current user from ${instance.url}`, 'GitlabApiService', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get projects with advanced filtering and pagination
+   */
+  async getProjectsWithOptions(
+    instance: GitlabInstance,
+    options: FetchOptions = {}
+  ): Promise<{
+    projects: GitlabProject[];
+    totalCount?: number;
+    pagination?: {
+      page: number;
+      perPage: number;
+      totalPages?: number;
+    };
+  }> {
+    const client = this.getClient(instance);
+
+    try {
+      // Build query string
+      const queryParams: Record<string, string | number | boolean> = {};
+
+      if (options.page) queryParams.page = options.page;
+      if (options.perPage) queryParams.per_page = options.perPage;
+      if (options.orderBy) queryParams.order_by = options.orderBy;
+      if (options.sort) queryParams.sort = options.sort;
+      if (options.search) queryParams.search = options.search;
+      if (options.visibility) queryParams.visibility = options.visibility;
+      if (options.owned !== undefined) queryParams.owned = options.owned;
+      if (options.membership !== undefined) queryParams.membership = options.membership;
+      if (options.starred !== undefined) queryParams.starred = options.starred;
+      if (options.statistics !== undefined) queryParams.statistics = options.statistics;
+
+      // Build query string manually
+      const queryString = Object.keys(queryParams).length > 0
+        ? '?' + Object.entries(queryParams)
+            .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+            .join('&')
+        : '';
+
+      const response = await client.get(`/projects${queryString}`);
+
+      // Get total count from headers if available
+      const totalCount = response.headers.get('X-Total') ? parseInt(response.headers.get('X-Total')!) : undefined;
+      const totalPages = response.headers.get('X-Total-Pages') ? parseInt(response.headers.get('X-Total-Pages')!) : undefined;
+
+      // Transform and sanitize projects
+      const projects = (response.data as any[]).map((project: any) => {
+        const transformedProject = this.transformGitlabProject(project, instance);
+        return sanitizeGitlabProject(transformedProject);
+      });
+
+      const result: {
+        projects: GitlabProject[];
+        totalCount?: number;
+        pagination?: {
+          page: number;
+          perPage: number;
+          totalPages?: number;
+        };
+      } = {
+        projects,
+      };
+
+      if (totalCount) {
+        result.totalCount = totalCount;
+      }
+
+      if (options.page && options.perPage) {
+        result.pagination = {
+          page: options.page,
+          perPage: options.perPage,
+        };
+        if (totalPages) {
+          result.pagination.totalPages = totalPages;
+        }
+      }
+
+      return result;
+    } catch (error) {
+      logger.error(`Failed to fetch projects with options from ${instance.url}`, 'GitlabApiService', error);
+      throw this.createUserFriendlyError(error, `Failed to fetch projects from ${instance.name || instance.url}`);
+    }
+  }
+
+  /**
+   * Transform GitLab API project data to our internal format
+   */
+  private transformGitlabProject(projectData: any, instance: GitlabInstance): GitlabProject {
+    return {
+      id: projectData.id,
+      name: projectData.name,
+      description: projectData.description || '',
+      status: 'healthy' as const, // Will be enhanced with activity analysis
+      openIssues: projectData.open_issues_count || 0,
+      branches: 0, // Will be fetched separately if needed
+      pullRequests: projectData.merge_requests_count || 0,
+      lastCommit: projectData.last_activity_at || '',
+      instanceUrl: instance.url,
+      instanceId: instance.id,
+      visibility: projectData.visibility,
+      defaultBranch: projectData.default_branch || 'main',
+      createdAt: new Date(projectData.created_at),
+      updatedAt: new Date(projectData.updated_at),
+      // Enhanced fields from GitLab API
+      webUrl: projectData.web_url || '',
+      sshUrl: projectData.ssh_url_to_repo || '',
+      httpUrl: projectData.http_url_to_repo || '',
+      starCount: projectData.star_count || 0,
+      forkCount: projectData.forks_count || 0,
+      commitCount: 0, // Will be fetched separately if needed
+      lastActivityAt: new Date(projectData.last_activity_at || projectData.updated_at),
+      openMergeRequestsCount: projectData.merge_requests_count || 0,
+      branchCount: 0, // Will be fetched separately if needed
+      permissions: {
+        projectAccess: projectData.permissions?.project_access?.access_level,
+        groupAccess: projectData.permissions?.group_access?.access_level,
+      },
+      pipelineStatus: projectData.pipeline?.status,
+      // Latest commit info will be populated separately
+    };
+  }
+
+  /**
+   * Create user-friendly error messages
+   */
+  private createUserFriendlyError(error: unknown, context: string): Error {
+    if (error instanceof GitlabApiError) {
+      switch (error.type) {
+        case GitlabErrorType.AUTHENTICATION_ERROR:
+          return new Error(`${context}: Authentication failed. Please check your access token.`);
+        case GitlabErrorType.RATE_LIMIT_EXCEEDED:
+          return new Error(`${context}: Rate limit exceeded. Please try again later.`);
+        case GitlabErrorType.NETWORK_ERROR:
+          return new Error(`${context}: Network connection failed. Please check your internet connection.`);
+        case GitlabErrorType.VALIDATION_ERROR:
+          return new Error(`${context}: Invalid request data.`);
+        default:
+          return new Error(`${context}: ${error.message}`);
+      }
+    }
+
+    if (error instanceof Error) {
+      return new Error(`${context}: ${error.message}`);
+    }
+
+    return new Error(`${context}: An unknown error occurred`);
   }
 
   async checkInstanceHealth(instance: GitlabInstance): Promise<{ status: string; version?: string }> {
