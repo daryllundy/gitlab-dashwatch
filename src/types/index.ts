@@ -24,16 +24,24 @@ export interface ApiRequestOptions {
 // GITLAB MONITORING TYPES
 // =============================================================================
 
+// Enhanced GitLab Instance Configuration
 export interface GitlabInstance {
   id: string;
   name: string;
   url: string;
-  token: string;
+  token: string; // encrypted in storage
   description?: string;
   isActive: boolean;
   lastChecked?: Date;
+  apiVersion: string;
+  connectionStatus: 'connected' | 'disconnected' | 'error' | 'checking';
+  errorMessage?: string;
+  rateLimitInfo?: RateLimitInfo;
+  selectedProjects: number[]; // IDs of projects to monitor
+  fetchOptions: FetchOptions;
 }
 
+// Enhanced GitLab Project with detailed metrics
 export interface GitlabProject {
   id: number;
   name: string;
@@ -49,6 +57,131 @@ export interface GitlabProject {
   defaultBranch: string;
   createdAt: Date;
   updatedAt: Date;
+  // Enhanced fields from GitLab API
+  webUrl: string;
+  sshUrl: string;
+  httpUrl: string;
+  starCount: number;
+  forkCount: number;
+  commitCount: number;
+  lastActivityAt: Date;
+  openMergeRequestsCount: number;
+  branchCount: number;
+  permissions: {
+    projectAccess?: number;
+    groupAccess?: number;
+  };
+  pipelineStatus?: 'success' | 'failed' | 'running' | 'pending' | 'canceled' | 'skipped';
+  // Latest commit info
+  lastCommitInfo?: {
+    id: string;
+    message: string;
+    authorName: string;
+    authorEmail: string;
+    committedDate: Date;
+    webUrl: string;
+  };
+}
+
+// GitLab API Configuration
+export interface GitlabApiConfig {
+  baseUrl: string;
+  token: string;
+  version: 'v4'; // GitLab API version
+  timeout: number;
+  retryAttempts: number;
+  retryDelay: number;
+}
+
+// Rate limiting information
+export interface RateLimitInfo {
+  limit: number;
+  remaining: number;
+  resetTime: Date;
+  retryAfter?: number;
+}
+
+// Fetch options for GitLab API
+export interface FetchOptions {
+  page?: number;
+  perPage?: number;
+  orderBy?: 'id' | 'name' | 'path' | 'created_at' | 'updated_at' | 'last_activity_at';
+  sort?: 'asc' | 'desc';
+  search?: string;
+  visibility?: 'private' | 'internal' | 'public';
+  owned?: boolean;
+  membership?: boolean;
+  starred?: boolean;
+  statistics?: boolean;
+  withIssuesEnabled?: boolean;
+  withMergeRequestsEnabled?: boolean;
+}
+
+// GitLab Settings Configuration
+export interface GitlabSettings {
+  instances: GitlabInstance[];
+  refreshInterval: number; // in minutes
+  maxProjects: number;
+  cacheTimeout: number; // in minutes
+  enableRealTimeUpdates: boolean;
+  defaultFetchOptions: FetchOptions;
+  rateLimitBuffer: number; // percentage buffer for rate limits
+}
+
+// Cache entry for GitLab data
+export interface GitlabCacheEntry {
+  instanceId: string;
+  projectId: number;
+  data: GitlabProject;
+  timestamp: Date;
+  expiresAt: Date;
+  etag?: string; // for HTTP caching
+}
+
+// Cache statistics
+export interface GitlabCacheStats {
+  namespace: string;
+  totalEntries: number;
+  memoryUsage: number;
+  hitRate: number;
+  missRate: number;
+}
+
+// GitLab API Error types
+export enum GitlabErrorType {
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  API_ERROR = 'API_ERROR',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  PERMISSION_ERROR = 'PERMISSION_ERROR',
+  INSTANCE_UNREACHABLE = 'INSTANCE_UNREACHABLE'
+}
+
+// Enhanced GitLab API Error
+export interface GitlabApiError extends Error {
+  type: GitlabErrorType;
+  instanceId?: string;
+  statusCode?: number;
+  rateLimitInfo?: RateLimitInfo;
+  details?: Record<string, unknown>;
+}
+
+// Validation result
+export interface GitlabValidationResult {
+  isValid: boolean;
+  errors: Array<{
+    field: string;
+    type: string;
+    message: string;
+  }>;
+}
+
+// GitLab instance validation
+export interface GitlabInstanceValidation extends GitlabValidationResult {
+  instanceId: string;
+  connectionTested: boolean;
+  apiVersion?: string;
 }
 
 // =============================================================================
